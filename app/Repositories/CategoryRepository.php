@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Core\Database;
+use PDO;
 
 final class CategoryRepository
 {
@@ -102,7 +103,7 @@ final class CategoryRepository
         $statement = $this->database->pdo()->prepare('SELECT id FROM categories WHERE parent_id = ?');
         $statement->execute([$id]);
 
-        return array_map('intval', $statement->fetchAll(\PDO::FETCH_COLUMN));
+        return array_map('intval', $statement->fetchAll(PDO::FETCH_COLUMN));
     }
 
     public function descendantIds(int $id): array
@@ -116,7 +117,7 @@ final class CategoryRepository
                 'SELECT id FROM categories WHERE parent_id IN (' . $placeholders . ')'
             );
             $statement->execute($frontier);
-            $children = array_map('intval', $statement->fetchAll(\PDO::FETCH_COLUMN));
+            $children = array_map('intval', $statement->fetchAll(PDO::FETCH_COLUMN));
             $children = array_values(array_diff($children, $descendants, [$id]));
             if ($children === []) {
                 break;
@@ -149,6 +150,16 @@ final class CategoryRepository
 
     public function heightOf(int $id): int
     {
+        return $this->heightOfNode($id, []);
+    }
+
+    private function heightOfNode(int $id, array $visited): int
+    {
+        if (isset($visited[$id])) {
+            return 1;
+        }
+        $visited[$id] = true;
+
         $children = $this->childrenOf($id);
         if ($children === []) {
             return 1;
@@ -156,7 +167,7 @@ final class CategoryRepository
 
         $height = 0;
         foreach ($children as $child) {
-            $height = max($height, $this->heightOf($child));
+            $height = max($height, $this->heightOfNode($child, $visited));
         }
 
         return 1 + $height;

@@ -155,6 +155,17 @@ final class CategoryServiceTest extends TestCase
         $this->service->approve($child, 2);
     }
 
+    public function testHeightOfSurvivesCycleInData(): void
+    {
+        $a = $this->service->createApproved($this->data('test_category_service_cycle_a'), 2);
+        $b = $this->service->createApproved($this->data('test_category_service_cycle_b', $a), 2);
+
+        $statement = $this->database->pdo()->prepare('UPDATE categories SET parent_id = ? WHERE id = ?');
+        $statement->execute([$b, $a]);
+
+        self::assertGreaterThan(0, $this->categories->heightOf($a));
+    }
+
     public function testRejectedProposalResubmitsAsPending(): void
     {
         $id = $this->service->createProposal($this->data('test_category_service_reject', 7), 3);
