@@ -46,7 +46,8 @@ INSERT INTO registrations (id, event_id, user_id, ticket_type_id, status, price,
 (2, 1, 4, 1, 'confirmed', 0.00, NULL, NULL, '2026-10-02 09:00:00', NULL, NULL, NULL),
 (3, 2, 3, 2, 'pending', 250.00, '0000000001', NULL, '2026-11-01 10:00:00', NULL, NULL, NULL),
 (4, 2, 4, 3, 'pending', 150.00, '0000000002', NULL, '2026-11-02 10:00:00', NULL, NULL, NULL),
-(5, 5, 3, 6, 'cancelled', 120.00, NULL, NULL, '2026-10-25 10:00:00', NULL, NULL, '2026-11-02 10:00:00');
+(5, 5, 3, 6, 'cancelled', 120.00, NULL, NULL, '2026-10-25 10:00:00', NULL, NULL, '2026-11-02 10:00:00'),
+(6, 1, 5, 1, 'confirmed', 0.00, NULL, NULL, '2026-10-03 09:00:00', NULL, NULL, NULL);
 
 INSERT INTO comments (id, event_id, user_id, body, status, moderated_by, moderated_at, hidden_reason, created_at, updated_at) VALUES
 (1, 1, 3, 'Skvělá akce, dobře zorganizované.', 'visible', NULL, NULL, NULL, '2026-10-18 08:00:00', '2026-10-18 08:00:00'),
