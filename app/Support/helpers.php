@@ -88,6 +88,16 @@ function event_status_label(string $status): string
     };
 }
 
+function registration_status_label(string $status): string
+{
+    return match ($status) {
+        'pending' => 'Čeká na platbu',
+        'confirmed' => 'Potvrzeno',
+        'cancelled' => 'Zrušeno',
+        default => $status,
+    };
+}
+
 function event_price_range(?string $minPrice, ?string $maxPrice): string
 {
     if ($minPrice === null || $maxPrice === null) {

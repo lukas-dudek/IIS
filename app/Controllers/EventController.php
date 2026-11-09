@@ -16,6 +16,7 @@ use App\Core\View;
 use App\Repositories\CommentRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\RatingRepository;
+use App\Repositories\RegistrationRepository;
 use App\Repositories\TicketTypeRepository;
 use App\Repositories\VenueRepository;
 use App\Services\CategoryService;
@@ -32,7 +33,8 @@ final class EventController
         private VenueRepository $venues,
         private CategoryService $categoryService,
         private CommentRepository $comments,
-        private RatingRepository $ratings
+        private RatingRepository $ratings,
+        private RegistrationRepository $registrations
     ) {
     }
 
@@ -128,6 +130,9 @@ final class EventController
             'rating' => $this->ratings->summaryForEvent((int) $event['id']),
             'comments' => $this->comments->visibleForEvent((int) $event['id']),
             'commentsOpen' => is_past($event['ends_at']),
+            'registration' => $this->auth->check()
+                ? $this->registrations->findForEventUser((int) $event['id'], (int) $this->auth->id())
+                : null,
         ]));
     }
 

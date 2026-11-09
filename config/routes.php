@@ -9,6 +9,7 @@ use App\Controllers\EventController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
+use App\Controllers\RegistrationController;
 use App\Controllers\VenueController;
 
 return [
@@ -382,6 +383,55 @@ return [
         'controller' => EventController::class,
         'action' => 'show',
         'middleware' => [],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moje-registrace',
+        'controller' => RegistrationController::class,
+        'action' => 'index',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/udalosti/{slug}/registrace',
+        'controller' => RegistrationController::class,
+        'action' => 'store',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/registrace/{id}/zrusit',
+        'controller' => RegistrationController::class,
+        'action' => 'cancel',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/registrace/{id}/uhrazeno',
+        'controller' => RegistrationController::class,
+        'action' => 'claimPayment',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/udalosti/{id}/ucastnici',
+        'controller' => RegistrationController::class,
+        'action' => 'participants',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/registrace/{id}/potvrdit',
+        'controller' => RegistrationController::class,
+        'action' => 'confirmPayment',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/registrace/{id}/odmitnout',
+        'controller' => RegistrationController::class,
+        'action' => 'rejectPayment',
+        'middleware' => ['auth'],
     ],
     [
         'method' => 'POST',

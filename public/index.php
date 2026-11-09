@@ -9,6 +9,7 @@ use App\Controllers\EventController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
+use App\Controllers\RegistrationController;
 use App\Controllers\VenueController;
 use App\Core\HttpException;
 use App\Core\Response;
@@ -45,7 +46,15 @@ $controllerFactory = static function (string $controller) use ($app): object {
             $app['venues'],
             $app['categoryService'],
             $app['comments'],
-            $app['ratings']
+            $app['ratings'],
+            $app['registrations']
+        ),
+        RegistrationController::class => new RegistrationController(
+            $app['view'],
+            $app['auth'],
+            $app['events'],
+            $app['registrations'],
+            $app['registrationService']
         ),
         default => throw new RuntimeException('Neznámý controller: ' . $controller),
     };

@@ -79,6 +79,18 @@ $returnPath = '/udalosti/' . $event['slug'];
                 </div>
             <?php endif; ?>
 
+            <?php
+            $registrationActive = $registration !== null
+                && in_array($registration['status'], ['pending', 'confirmed'], true);
+            $eventFull = $event['capacity'] !== null
+                && (int) $event['active_registrations'] >= (int) $event['capacity'];
+            $eventStarted = is_past($event['starts_at']);
+            $availableTickets = array_filter(
+                $tickets,
+                static fn (array $ticket): bool => $ticket['capacity'] === null
+                    || (int) $ticket['active_count'] < (int) $ticket['capacity']
+            );
+            ?>
             <?php if ($user === null): ?>
                 <p class="mt-3 mb-0">
                     <a class="btn btn-primary"
@@ -86,6 +98,74 @@ $returnPath = '/udalosti/' . $event['slug'];
                         Přihlásit se pro registraci
                     </a>
                 </p>
+            <?php elseif ($registrationActive): ?>
+                <div class="mt-3">
+                    <?php $regBadge = $registration['status'] === 'confirmed' ? 'success' : 'warning'; ?>
+                    <p class="mb-1">
+                        Vaše registrace:
+                        <span class="badge text-bg-<?= $regBadge ?>">
+                            <?= e(registration_status_label($registration['status'])) ?>
+                        </span>
+                    </p>
+                    <?php if ($registration['status'] === 'pending'): ?>
+                        <p class="small mb-1">
+                            Variabilní symbol: <code><?= e($registration['variable_symbol'] ?? '—') ?></code>
+                        </p>
+                        <?php if (!empty($event['payment_note'])): ?>
+                            <p class="small text-muted mb-1"><?= nl2br(e($event['payment_note'])) ?></p>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <a class="btn btn-sm btn-outline-primary" href="<?= e(url('/moje-registrace')) ?>">
+                        Zobrazit moje registrace
+                    </a>
+                </div>
+            <?php elseif ($eventStarted): ?>
+                <p class="mt-3 mb-0 text-muted">Registrace už není možná, událost již začala.</p>
+            <?php elseif ($eventFull): ?>
+                <p class="mt-3 mb-0 text-muted">Kapacita události je plná.</p>
+            <?php elseif ($availableTickets === []): ?>
+                <p class="mt-3 mb-0 text-muted">Všechny typy vstupenek jsou obsazené.</p>
+            <?php else: ?>
+                <?php if ($registration !== null && $registration['status'] === 'cancelled'): ?>
+                    <div class="alert alert-info mt-3 py-2 small">
+                        Vaše předchozí registrace byla zrušena. Můžete se znovu registrovat.
+                    </div>
+                <?php endif; ?>
+                <form method="post" action="<?= e(url('/udalosti/' . $event['slug'] . '/registrace')) ?>" class="mt-3">
+                    <?= csrf_field() ?>
+                    <fieldset>
+                        <legend class="h6 mb-2">Vyberte typ vstupenky</legend>
+                        <?php foreach ($tickets as $ticket): ?>
+                            <?php
+                            $ticketCapacity = $ticket['capacity'] === null ? null : (int) $ticket['capacity'];
+                            $active = (int) $ticket['active_count'];
+                            $ticketFull = $ticketCapacity !== null && $active >= $ticketCapacity;
+                            ?>
+                            <div class="form-check border rounded p-3 mb-2<?= $ticketFull ? ' bg-light' : '' ?>">
+                                <input class="form-check-input" type="radio" name="ticket_type_id"
+                                       id="ticket-type-<?= (int) $ticket['id'] ?>" value="<?= (int) $ticket['id'] ?>"
+                                       required<?= $ticketFull ? ' disabled' : '' ?>>
+                                <label class="form-check-label d-flex justify-content-between gap-3"
+                                       for="ticket-type-<?= (int) $ticket['id'] ?>">
+                                    <span>
+                                        <span class="fw-semibold"><?= e($ticket['name']) ?></span><br>
+                                        <span class="small text-muted">
+                                            <?php if ($ticketFull): ?>
+                                                Obsazeno
+                                            <?php elseif ($ticketCapacity === null): ?>
+                                                Bez limitu
+                                            <?php else: ?>
+                                                Zbývá <?= max(0, $ticketCapacity - $active) ?> z <?= $ticketCapacity ?>
+                                            <?php endif; ?>
+                                        </span>
+                                    </span>
+                                    <span class="fw-semibold"><?= e(format_money($ticket['price'])) ?></span>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </fieldset>
+                    <button type="submit" class="btn btn-primary">Registrovat se</button>
+                </form>
             <?php endif; ?>
         </div>
 
