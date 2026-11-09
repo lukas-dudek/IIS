@@ -28,7 +28,7 @@ $hasFilters = $q !== '' || $categoryId > 0 || $city !== '' || $from !== '' || $t
 ?>
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
     <h1 class="h4 mb-0">Události</h1>
-    <span class="text-muted"><?= (int) $total ?> výsledků</span>
+    <span class="text-muted"><?= (int) $total ?> <?= e(plural_results((int) $total)) ?></span>
 </div>
 
 <form method="get" action="<?= e(url('/udalosti')) ?>" class="bg-white border rounded-3 p-3 mb-3">

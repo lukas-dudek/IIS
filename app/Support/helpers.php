@@ -111,6 +111,24 @@ function event_occupancy(int $active, ?int $capacity): string
     return $active . ' / ' . ($capacity === null ? 'neomezeno' : $capacity);
 }
 
+function plural_results(int $count): string
+{
+    $mod100 = $count % 100;
+    $mod10 = $count % 10;
+
+    if ($mod100 >= 11 && $mod100 <= 14) {
+        return 'výsledků';
+    }
+    if ($mod10 === 1) {
+        return 'výsledek';
+    }
+    if ($mod10 >= 2 && $mod10 <= 4) {
+        return 'výsledky';
+    }
+
+    return 'výsledků';
+}
+
 function abort(int $status, string $message = ''): never
 {
     throw new HttpException($status, $message);
