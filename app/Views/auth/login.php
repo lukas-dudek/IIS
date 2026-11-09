@@ -21,7 +21,7 @@ declare(strict_types=1);
                            autocomplete="username" required autofocus
                            <?= isset($errors['username']) ? 'aria-invalid="true" aria-describedby="username-error"' : '' ?>>
                     <?php if (isset($errors['username'])): ?>
-                        <div class="invalid-feedback" id="username-error"><?= e($errors['username']) ?></div>
+                        <div class="invalid-feedback d-block" id="username-error"><?= e($errors['username']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -33,7 +33,7 @@ declare(strict_types=1);
                            id="password" name="password" autocomplete="current-password" required
                            <?= isset($errors['password']) ? 'aria-invalid="true" aria-describedby="password-error"' : '' ?>>
                     <?php if (isset($errors['password'])): ?>
-                        <div class="invalid-feedback" id="password-error"><?= e($errors['password']) ?></div>
+                        <div class="invalid-feedback d-block" id="password-error"><?= e($errors['password']) ?></div>
                     <?php endif; ?>
                 </div>
 

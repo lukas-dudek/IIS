@@ -26,7 +26,7 @@ $passwordFirstError = array_key_first($passwordErrors);
                            <?= $profileFirstError === 'name' ? 'autofocus' : '' ?>
                            <?= isset($profileErrors['name']) ? 'aria-invalid="true" aria-describedby="name-error"' : '' ?>>
                     <?php if (isset($profileErrors['name'])): ?>
-                        <div class="invalid-feedback" id="name-error"><?= e($profileErrors['name']) ?></div>
+                        <div class="invalid-feedback d-block" id="name-error"><?= e($profileErrors['name']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -40,7 +40,7 @@ $passwordFirstError = array_key_first($passwordErrors);
                            <?= $profileFirstError === 'email' ? 'autofocus' : '' ?>
                            <?= isset($profileErrors['email']) ? 'aria-invalid="true" aria-describedby="email-error"' : '' ?>>
                     <?php if (isset($profileErrors['email'])): ?>
-                        <div class="invalid-feedback" id="email-error"><?= e($profileErrors['email']) ?></div>
+                        <div class="invalid-feedback d-block" id="email-error"><?= e($profileErrors['email']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -69,7 +69,7 @@ $passwordFirstError = array_key_first($passwordErrors);
                            <?= $passwordFirstError === 'current_password' ? 'autofocus' : '' ?>
                            <?= isset($passwordErrors['current_password']) ? 'aria-invalid="true" aria-describedby="current-password-error"' : '' ?>>
                     <?php if (isset($passwordErrors['current_password'])): ?>
-                        <div class="invalid-feedback" id="current-password-error"><?= e($passwordErrors['current_password']) ?></div>
+                        <div class="invalid-feedback d-block" id="current-password-error"><?= e($passwordErrors['current_password']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -83,7 +83,7 @@ $passwordFirstError = array_key_first($passwordErrors);
                            <?= isset($passwordErrors['new_password']) ? 'aria-invalid="true" aria-describedby="new-password-error"' : '' ?>>
                     <div class="form-text">Alespoň 8 znaků.</div>
                     <?php if (isset($passwordErrors['new_password'])): ?>
-                        <div class="invalid-feedback" id="new-password-error"><?= e($passwordErrors['new_password']) ?></div>
+                        <div class="invalid-feedback d-block" id="new-password-error"><?= e($passwordErrors['new_password']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -96,7 +96,7 @@ $passwordFirstError = array_key_first($passwordErrors);
                            <?= $passwordFirstError === 'new_password_confirm' ? 'autofocus' : '' ?>
                            <?= isset($passwordErrors['new_password_confirm']) ? 'aria-invalid="true" aria-describedby="new-password-confirm-error"' : '' ?>>
                     <?php if (isset($passwordErrors['new_password_confirm'])): ?>
-                        <div class="invalid-feedback" id="new-password-confirm-error"><?= e($passwordErrors['new_password_confirm']) ?></div>
+                        <div class="invalid-feedback d-block" id="new-password-confirm-error"><?= e($passwordErrors['new_password_confirm']) ?></div>
                     <?php endif; ?>
                 </div>
 

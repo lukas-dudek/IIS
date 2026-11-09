@@ -36,7 +36,7 @@ $action = $isEdit
                        <?= isset($errors['username']) ? 'aria-invalid="true" aria-describedby="username-error"' : '' ?>>
                 <div class="form-text">3–50 znaků, povolena jsou písmena, čísla, tečka, podtržítko a pomlčka.</div>
                 <?php if (isset($errors['username'])): ?>
-                    <div class="invalid-feedback" id="username-error"><?= e($errors['username']) ?></div>
+                    <div class="invalid-feedback d-block" id="username-error"><?= e($errors['username']) ?></div>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
@@ -51,7 +51,7 @@ $action = $isEdit
                    <?= $firstError === 'name' ? 'autofocus' : '' ?>
                    <?= isset($errors['name']) ? 'aria-invalid="true" aria-describedby="name-error"' : '' ?>>
             <?php if (isset($errors['name'])): ?>
-                <div class="invalid-feedback" id="name-error"><?= e($errors['name']) ?></div>
+                <div class="invalid-feedback d-block" id="name-error"><?= e($errors['name']) ?></div>
             <?php endif; ?>
         </div>
 
@@ -65,7 +65,7 @@ $action = $isEdit
                    <?= $firstError === 'email' ? 'autofocus' : '' ?>
                    <?= isset($errors['email']) ? 'aria-invalid="true" aria-describedby="email-error"' : '' ?>>
             <?php if (isset($errors['email'])): ?>
-                <div class="invalid-feedback" id="email-error"><?= e($errors['email']) ?></div>
+                <div class="invalid-feedback d-block" id="email-error"><?= e($errors['email']) ?></div>
             <?php endif; ?>
         </div>
 
@@ -81,7 +81,7 @@ $action = $isEdit
                 <option value="admin"<?= selected($currentRole, 'admin') ?>>Administrátor</option>
             </select>
             <?php if (isset($errors['role'])): ?>
-                <div class="invalid-feedback" id="role-error"><?= e($errors['role']) ?></div>
+                <div class="invalid-feedback d-block" id="role-error"><?= e($errors['role']) ?></div>
             <?php endif; ?>
         </div>
 
@@ -96,7 +96,7 @@ $action = $isEdit
                        <?= isset($errors['password']) ? 'aria-invalid="true" aria-describedby="password-error"' : '' ?>>
                 <div class="form-text">Alespoň 8 znaků.</div>
                 <?php if (isset($errors['password'])): ?>
-                    <div class="invalid-feedback" id="password-error"><?= e($errors['password']) ?></div>
+                    <div class="invalid-feedback d-block" id="password-error"><?= e($errors['password']) ?></div>
                 <?php endif; ?>
             </div>
 
@@ -109,7 +109,7 @@ $action = $isEdit
                        <?= $firstError === 'password_confirm' ? 'autofocus' : '' ?>
                        <?= isset($errors['password_confirm']) ? 'aria-invalid="true" aria-describedby="password-confirm-error"' : '' ?>>
                 <?php if (isset($errors['password_confirm'])): ?>
-                    <div class="invalid-feedback" id="password-confirm-error"><?= e($errors['password_confirm']) ?></div>
+                    <div class="invalid-feedback d-block" id="password-confirm-error"><?= e($errors['password_confirm']) ?></div>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -144,7 +144,7 @@ $action = $isEdit
                        <?= isset($passwordErrors['new_password']) ? 'aria-invalid="true" aria-describedby="new-password-error"' : '' ?>>
                 <div class="form-text">Alespoň 8 znaků. Změna ukončí všechny relace uživatele.</div>
                 <?php if (isset($passwordErrors['new_password'])): ?>
-                    <div class="invalid-feedback" id="new-password-error"><?= e($passwordErrors['new_password']) ?></div>
+                    <div class="invalid-feedback d-block" id="new-password-error"><?= e($passwordErrors['new_password']) ?></div>
                 <?php endif; ?>
             </div>
 
@@ -157,7 +157,7 @@ $action = $isEdit
                        <?= $passwordFirstError === 'new_password_confirm' ? 'autofocus' : '' ?>
                        <?= isset($passwordErrors['new_password_confirm']) ? 'aria-invalid="true" aria-describedby="new-password-confirm-error"' : '' ?>>
                 <?php if (isset($passwordErrors['new_password_confirm'])): ?>
-                    <div class="invalid-feedback" id="new-password-confirm-error"><?= e($passwordErrors['new_password_confirm']) ?></div>
+                    <div class="invalid-feedback d-block" id="new-password-confirm-error"><?= e($passwordErrors['new_password_confirm']) ?></div>
                 <?php endif; ?>
             </div>
 

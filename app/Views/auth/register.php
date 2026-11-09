@@ -24,7 +24,7 @@ $firstError = array_key_first($errors);
                            <?= isset($errors['username']) ? 'aria-invalid="true" aria-describedby="username-error"' : '' ?>>
                     <div class="form-text">3–50 znaků, povolena jsou písmena, čísla, tečka, podtržítko a pomlčka.</div>
                     <?php if (isset($errors['username'])): ?>
-                        <div class="invalid-feedback" id="username-error"><?= e($errors['username']) ?></div>
+                        <div class="invalid-feedback d-block" id="username-error"><?= e($errors['username']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -38,7 +38,7 @@ $firstError = array_key_first($errors);
                            <?= $firstError === 'email' ? 'autofocus' : '' ?>
                            <?= isset($errors['email']) ? 'aria-invalid="true" aria-describedby="email-error"' : '' ?>>
                     <?php if (isset($errors['email'])): ?>
-                        <div class="invalid-feedback" id="email-error"><?= e($errors['email']) ?></div>
+                        <div class="invalid-feedback d-block" id="email-error"><?= e($errors['email']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -52,7 +52,7 @@ $firstError = array_key_first($errors);
                            <?= $firstError === 'name' ? 'autofocus' : '' ?>
                            <?= isset($errors['name']) ? 'aria-invalid="true" aria-describedby="name-error"' : '' ?>>
                     <?php if (isset($errors['name'])): ?>
-                        <div class="invalid-feedback" id="name-error"><?= e($errors['name']) ?></div>
+                        <div class="invalid-feedback d-block" id="name-error"><?= e($errors['name']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -66,7 +66,7 @@ $firstError = array_key_first($errors);
                            <?= isset($errors['password']) ? 'aria-invalid="true" aria-describedby="password-error"' : '' ?>>
                     <div class="form-text">Alespoň 8 znaků.</div>
                     <?php if (isset($errors['password'])): ?>
-                        <div class="invalid-feedback" id="password-error"><?= e($errors['password']) ?></div>
+                        <div class="invalid-feedback d-block" id="password-error"><?= e($errors['password']) ?></div>
                     <?php endif; ?>
                 </div>
 
@@ -79,7 +79,7 @@ $firstError = array_key_first($errors);
                            <?= $firstError === 'password_confirm' ? 'autofocus' : '' ?>
                            <?= isset($errors['password_confirm']) ? 'aria-invalid="true" aria-describedby="password-confirm-error"' : '' ?>>
                     <?php if (isset($errors['password_confirm'])): ?>
-                        <div class="invalid-feedback" id="password-confirm-error"><?= e($errors['password_confirm']) ?></div>
+                        <div class="invalid-feedback d-block" id="password-confirm-error"><?= e($errors['password_confirm']) ?></div>
                     <?php endif; ?>
                 </div>
 
