@@ -11,6 +11,7 @@ use App\Core\ValidationException;
 use App\Repositories\EventRepository;
 use App\Repositories\RegistrationRepository;
 use App\Repositories\TicketTypeRepository;
+use RuntimeException;
 
 final class RegistrationService
 {
@@ -72,7 +73,7 @@ final class RegistrationService
 
             $registration = $this->registrations->find($id);
             if ($registration === null) {
-                throw new \RuntimeException('Registraci se nepodařilo načíst.');
+                throw new RuntimeException('Registraci se nepodařilo načíst.');
             }
 
             return $registration;
