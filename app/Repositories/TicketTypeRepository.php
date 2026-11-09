@@ -22,6 +22,21 @@ final class TicketTypeRepository
         return $statement->fetchAll();
     }
 
+    public function forEventWithAvailability(int $eventId): array
+    {
+        $statement = $this->database->pdo()->prepare(
+            "SELECT t.*,
+                    (SELECT COUNT(*) FROM registrations r
+                     WHERE r.ticket_type_id = t.id AND r.status IN ('pending', 'confirmed')) AS active_count
+             FROM ticket_types t
+             WHERE t.event_id = ?
+             ORDER BY t.price ASC, t.name ASC"
+        );
+        $statement->execute([$eventId]);
+
+        return $statement->fetchAll();
+    }
+
     public function find(int $id): ?array
     {
         $statement = $this->database->pdo()->prepare('SELECT * FROM ticket_types WHERE id = ?');

@@ -29,7 +29,7 @@ $routes = require dirname(__DIR__) . '/config/routes.php';
 
 $controllerFactory = static function (string $controller) use ($app): object {
     return match ($controller) {
-        HomeController::class => new HomeController($app['view']),
+        HomeController::class => new HomeController($app['view'], $app['events'], $app['categoryService']),
         AuthController::class => new AuthController($app['view'], $app['auth'], $app['authService']),
         ProfileController::class => new ProfileController($app['view'], $app['auth'], $app['userService'], $app['venues'], $app['categoryService']),
         AdminUserController::class => new AdminUserController($app['view'], $app['auth'], $app['userService']),
@@ -43,7 +43,9 @@ $controllerFactory = static function (string $controller) use ($app): object {
             $app['ticketTypes'],
             $app['eventService'],
             $app['venues'],
-            $app['categoryService']
+            $app['categoryService'],
+            $app['comments'],
+            $app['ratings']
         ),
         default => throw new RuntimeException('Neznámý controller: ' . $controller),
     };

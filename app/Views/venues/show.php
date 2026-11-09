@@ -29,7 +29,11 @@ $address = trim(($venue['postal_code'] ?? '') . ' ' . $venue['city']);
                 <ul class="list-unstyled mb-0">
                     <?php foreach ($events as $event): ?>
                         <li class="border-bottom py-2">
-                            <div class="fw-semibold"><?= e($event['title']) ?></div>
+                            <div class="fw-semibold">
+                                <a class="text-decoration-none" href="<?= e(url('/udalosti/' . $event['slug'])) ?>">
+                                    <?= e($event['title']) ?>
+                                </a>
+                            </div>
                             <div class="small text-muted">
                                 <?= e(format_date_range($event['starts_at'], $event['ends_at'])) ?>
                                 · <?= e($event['category_name']) ?>

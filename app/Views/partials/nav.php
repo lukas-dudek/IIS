@@ -11,6 +11,10 @@ $isProfile = str_starts_with($current . '/', rtrim(url('/profil'), '/') . '/');
 $isAdminUsers = str_starts_with($current . '/', rtrim(url('/admin/uzivatele'), '/') . '/');
 $isVenues = $current === rtrim(url('/mista'), '/')
     || str_starts_with($current . '/', rtrim(url('/mista'), '/') . '/');
+$isEvents = $current === rtrim(url('/udalosti'), '/')
+    || (str_starts_with($current . '/', rtrim(url('/udalosti'), '/') . '/')
+        && !str_contains($current, '/upravit')
+        && !str_ends_with($current, '/nova'));
 $isProposals = $current === rtrim(url('/moje-navrhy'), '/');
 $isMyEvents = $current === rtrim(url('/moje-udalosti'), '/');
 $isModeration = str_starts_with($current . '/', rtrim(url('/moderace'), '/') . '/');
@@ -29,6 +33,10 @@ $isAdmin = $user !== null && $user['role'] === 'admin';
                 <li class="nav-item">
                     <a class="nav-link<?= $isHome ? ' active' : '' ?>" href="<?= e(url('/')) ?>"
                        <?= $isHome ? 'aria-current="page"' : '' ?>>Domů</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link<?= $isEvents ? ' active' : '' ?>" href="<?= e(url('/udalosti')) ?>"
+                       <?= $isEvents ? 'aria-current="page"' : '' ?>>Události</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link<?= $isVenues ? ' active' : '' ?>" href="<?= e(url('/mista')) ?>"

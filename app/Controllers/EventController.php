@@ -13,7 +13,9 @@ use App\Core\Session;
 use App\Core\ValidationException;
 use App\Core\Validator;
 use App\Core\View;
+use App\Repositories\CommentRepository;
 use App\Repositories\EventRepository;
+use App\Repositories\RatingRepository;
 use App\Repositories\TicketTypeRepository;
 use App\Repositories\VenueRepository;
 use App\Services\CategoryService;
@@ -28,8 +30,112 @@ final class EventController
         private TicketTypeRepository $tickets,
         private EventService $eventService,
         private VenueRepository $venues,
-        private CategoryService $categoryService
+        private CategoryService $categoryService,
+        private CommentRepository $comments,
+        private RatingRepository $ratings
     ) {
+    }
+
+    public function index(Request $request, array $params): Response
+    {
+        $q = mb_substr($this->queryString($request, 'q'), 0, 100);
+        $categoryRaw = $this->queryString($request, 'kategorie');
+        $categoryId = preg_match('/^\d+$/', $categoryRaw) === 1 ? (int) $categoryRaw : 0;
+        $categoryIds = $categoryId > 0
+            ? array_merge([$categoryId], $this->categoryService->descendantIds($categoryId))
+            : [];
+        $city = $this->queryString($request, 'mesto');
+
+        $fromRaw = $this->queryString($request, 'od');
+        $toRaw = $this->queryString($request, 'do');
+        $from = $fromRaw === '' ? null : prague_day_start_utc($fromRaw);
+        $to = $toRaw === '' ? null : prague_day_end_utc($toRaw);
+        if ($from === null) {
+            $fromRaw = '';
+        }
+        if ($to === null) {
+            $toRaw = '';
+        }
+        if ($from !== null && $to !== null && $from > $to) {
+            $from = null;
+            $to = null;
+            $fromRaw = '';
+            $toRaw = '';
+        }
+
+        $priceRaw = $this->queryString($request, 'vstupne');
+        $price = in_array($priceRaw, ['free', 'paid'], true) ? $priceRaw : '';
+        $availabilityRaw = $this->queryString($request, 'dostupnost');
+        $availability = in_array($availabilityRaw, ['available', 'full'], true) ? $availabilityRaw : '';
+        $archive = $this->queryString($request, 'archiv') === '1';
+        $sortRaw = $this->queryString($request, 'razeni');
+        $sort = in_array($sortRaw, ['date', 'price', 'title'], true) ? $sortRaw : 'date';
+        $pageRaw = $this->queryString($request, 'strana');
+        $page = preg_match('/^\d+$/', $pageRaw) === 1 ? max(1, (int) $pageRaw) : 1;
+        $perPage = 12;
+
+        $filters = [
+            'q' => $q,
+            'category_ids' => $categoryIds,
+            'city' => $city,
+            'from' => $from,
+            'to' => $to,
+            'price' => $price,
+            'availability' => $availability,
+            'archive' => $archive,
+            'sort' => $sort,
+        ];
+
+        $result = $this->events->search($filters, $page, $perPage);
+        $totalPages = max(1, (int) ceil($result['total'] / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+            $result = $this->events->search($filters, $page, $perPage);
+        }
+
+        return Response::html($this->view->render('events/index', [
+            'title' => 'Události',
+            'events' => $result['items'],
+            'total' => $result['total'],
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'q' => $q,
+            'categoryId' => $categoryId,
+            'city' => $city,
+            'from' => $fromRaw,
+            'to' => $toRaw,
+            'price' => $price,
+            'availability' => $availability,
+            'archive' => $archive,
+            'sort' => $sort,
+            'categories' => $this->categoryService->approvedOptions(),
+            'cities' => $this->events->cities(),
+        ]));
+    }
+
+    public function show(Request $request, array $params): Response
+    {
+        $slug = (string) ($params['slug'] ?? '');
+        $event = $this->events->findBySlug($slug);
+        if ($event === null) {
+            abort(404);
+        }
+
+        return Response::html($this->view->render('events/show', [
+            'title' => $event['title'],
+            'event' => $event,
+            'tickets' => $this->tickets->forEventWithAvailability((int) $event['id']),
+            'rating' => $this->ratings->summaryForEvent((int) $event['id']),
+            'comments' => $this->comments->visibleForEvent((int) $event['id']),
+            'commentsOpen' => is_past($event['ends_at']),
+        ]));
+    }
+
+    private function queryString(Request $request, string $key): string
+    {
+        $value = $request->query($key, '');
+
+        return is_string($value) ? trim($value) : '';
     }
 
     public function mine(Request $request, array $params): Response

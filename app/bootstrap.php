@@ -12,7 +12,9 @@ use App\Core\Upload;
 use App\Core\View;
 use App\Core\Authorization;
 use App\Repositories\CategoryRepository;
+use App\Repositories\CommentRepository;
 use App\Repositories\EventRepository;
+use App\Repositories\RatingRepository;
 use App\Repositories\TicketTypeRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\VenueRepository;
@@ -94,6 +96,8 @@ $categories = new CategoryRepository($database);
 $categoryService = new CategoryService($categories);
 $events = new EventRepository($database);
 $ticketTypes = new TicketTypeRepository($database);
+$comments = new CommentRepository($database);
+$ratings = new RatingRepository($database);
 $eventService = new EventService($events, $ticketTypes, $venues, $categories, $database);
 
 $request = Request::fromGlobals();
@@ -119,6 +123,8 @@ return [
     'categoryService' => $categoryService,
     'events' => $events,
     'ticketTypes' => $ticketTypes,
+    'comments' => $comments,
+    'ratings' => $ratings,
     'eventService' => $eventService,
     'request' => $request,
 ];

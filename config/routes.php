@@ -350,6 +350,13 @@ return [
     ],
     [
         'method' => 'GET',
+        'pattern' => '/udalosti',
+        'controller' => EventController::class,
+        'action' => 'index',
+        'middleware' => [],
+    ],
+    [
+        'method' => 'GET',
         'pattern' => '/udalosti/nova',
         'controller' => EventController::class,
         'action' => 'create',
@@ -368,6 +375,13 @@ return [
         'controller' => EventController::class,
         'action' => 'edit',
         'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/udalosti/{slug}',
+        'controller' => EventController::class,
+        'action' => 'show',
+        'middleware' => [],
     ],
     [
         'method' => 'POST',

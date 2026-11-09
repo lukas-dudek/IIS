@@ -5,11 +5,110 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Core\Database;
+use PDO;
 
 final class EventRepository
 {
     public function __construct(private Database $database)
     {
+    }
+
+    public function search(array $filters, int $page, int $perPage = 12): array
+    {
+        $where = ["e.status = 'approved'"];
+        $params = [];
+
+        if (empty($filters['archive'])) {
+            $where[] = 'e.starts_at >= ?';
+            $params[] = now_utc();
+        }
+        if (($filters['q'] ?? '') !== '') {
+            $like = '%' . $this->escapeLike((string) $filters['q']) . '%';
+            $where[] = '(e.title LIKE ? OR e.description LIKE ? OR v.name LIKE ? OR v.city LIKE ?)';
+            array_push($params, $like, $like, $like, $like);
+        }
+        if (!empty($filters['category_ids'])) {
+            $ids = array_values(array_unique(array_map('intval', $filters['category_ids'])));
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $where[] = 'e.category_id IN (' . $placeholders . ')';
+            foreach ($ids as $id) {
+                $params[] = $id;
+            }
+        }
+        if (($filters['city'] ?? '') !== '') {
+            $where[] = 'v.city = ?';
+            $params[] = $filters['city'];
+        }
+        if (!empty($filters['from'])) {
+            $where[] = 'e.starts_at >= ?';
+            $params[] = $filters['from'];
+        }
+        if (!empty($filters['to'])) {
+            $where[] = 'e.starts_at <= ?';
+            $params[] = $filters['to'];
+        }
+        if (($filters['price'] ?? '') === 'free') {
+            $where[] = "NOT EXISTS (SELECT 1 FROM ticket_types tt WHERE tt.event_id = e.id AND tt.price > 0)";
+        } elseif (($filters['price'] ?? '') === 'paid') {
+            $where[] = "EXISTS (SELECT 1 FROM ticket_types tt WHERE tt.event_id = e.id AND tt.price > 0)";
+        }
+        $fullSql = "(e.capacity IS NOT NULL AND (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id AND r.status IN ('pending', 'confirmed')) >= e.capacity)";
+        if (($filters['availability'] ?? '') === 'available') {
+            $where[] = 'NOT ' . $fullSql;
+        } elseif (($filters['availability'] ?? '') === 'full') {
+            $where[] = $fullSql;
+        }
+
+        $whereSql = implode(' AND ', $where);
+        $joinSql = ' FROM events e JOIN venues v ON v.id = e.venue_id JOIN categories c ON c.id = e.category_id';
+
+        $countStatement = $this->database->pdo()->prepare('SELECT COUNT(*)' . $joinSql . ' WHERE ' . $whereSql);
+        $countStatement->execute($params);
+        $total = (int) $countStatement->fetchColumn();
+
+        $order = match ($filters['sort'] ?? 'date') {
+            'price' => '(SELECT COALESCE(MIN(tt.price), 0) FROM ticket_types tt WHERE tt.event_id = e.id) ASC, e.starts_at ASC',
+            'title' => 'e.title ASC, e.starts_at ASC',
+            default => 'e.starts_at ASC, e.id ASC',
+        };
+
+        $sql = 'SELECT e.*, v.name AS venue_name, v.city AS venue_city, c.name AS category_name,
+                    (SELECT MIN(tt.price) FROM ticket_types tt WHERE tt.event_id = e.id) AS min_price,
+                    (SELECT MAX(tt.price) FROM ticket_types tt WHERE tt.event_id = e.id) AS max_price,
+                    (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id AND r.status IN (\'pending\', \'confirmed\')) AS active_registrations,
+                    (SELECT AVG(r.value) FROM ratings r WHERE r.event_id = e.id) AS rating_avg,
+                    (SELECT COUNT(*) FROM ratings r WHERE r.event_id = e.id) AS rating_count'
+            . $joinSql . ' WHERE ' . $whereSql . ' ORDER BY ' . $order . ' LIMIT ? OFFSET ?';
+
+        $statement = $this->database->pdo()->prepare($sql);
+        $position = 1;
+        foreach ($params as $param) {
+            $statement->bindValue($position++, $param);
+        }
+        $page = max(1, $page);
+        $statement->bindValue($position++, $perPage, PDO::PARAM_INT);
+        $statement->bindValue($position, ($page - 1) * $perPage, PDO::PARAM_INT);
+        $statement->execute();
+
+        return ['items' => $statement->fetchAll(), 'total' => $total];
+    }
+
+    public function cities(): array
+    {
+        $statement = $this->database->pdo()->query(
+            "SELECT DISTINCT v.city
+             FROM events e
+             JOIN venues v ON v.id = e.venue_id
+             WHERE e.status = 'approved'
+             ORDER BY v.city ASC"
+        );
+
+        return array_map('strval', $statement->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
     }
 
     public function mine(int $managerId): array
@@ -76,7 +175,10 @@ final class EventRepository
     {
         $statement = $this->database->pdo()->prepare(
             "SELECT e.*, v.name AS venue_name, v.city AS venue_city, v.street AS venue_street,
-                    v.postal_code AS venue_postal_code, c.name AS category_name
+                    v.postal_code AS venue_postal_code, c.name AS category_name,
+                    (SELECT COUNT(*) FROM registrations r WHERE r.event_id = e.id AND r.status IN ('pending', 'confirmed')) AS active_registrations,
+                    (SELECT AVG(r.value) FROM ratings r WHERE r.event_id = e.id) AS rating_avg,
+                    (SELECT COUNT(*) FROM ratings r WHERE r.event_id = e.id) AS rating_count
              FROM events e
              JOIN venues v ON v.id = e.venue_id
              JOIN categories c ON c.id = e.category_id

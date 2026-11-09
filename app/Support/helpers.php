@@ -88,6 +88,29 @@ function event_status_label(string $status): string
     };
 }
 
+function event_price_range(?string $minPrice, ?string $maxPrice): string
+{
+    if ($minPrice === null || $maxPrice === null) {
+        return '—';
+    }
+
+    $min = (float) $minPrice;
+    $max = (float) $maxPrice;
+    if ($min === 0.0 && $max === 0.0) {
+        return 'Zdarma';
+    }
+    if ($min === $max) {
+        return format_money($min);
+    }
+
+    return number_format($min, 0, ',', ' ') . '–' . format_money($max);
+}
+
+function event_occupancy(int $active, ?int $capacity): string
+{
+    return $active . ' / ' . ($capacity === null ? 'neomezeno' : $capacity);
+}
+
 function abort(int $status, string $message = ''): never
 {
     throw new HttpException($status, $message);

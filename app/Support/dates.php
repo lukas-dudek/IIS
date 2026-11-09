@@ -73,6 +73,28 @@ function prague_input_value(?string $utc): string
     return $date === null ? '' : $date->format('Y-m-d\TH:i');
 }
 
+function prague_day_start_utc(string $date): ?string
+{
+    $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date, new DateTimeZone('Europe/Prague'));
+    $errors = DateTimeImmutable::getLastErrors();
+    if ($parsed === false || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+        return null;
+    }
+
+    return $parsed->setTime(0, 0, 0)->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+}
+
+function prague_day_end_utc(string $date): ?string
+{
+    $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date, new DateTimeZone('Europe/Prague'));
+    $errors = DateTimeImmutable::getLastErrors();
+    if ($parsed === false || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+        return null;
+    }
+
+    return $parsed->setTime(23, 59, 59)->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+}
+
 function default_event_times(): array
 {
     $now = new DateTimeImmutable('now', new DateTimeZone('Europe/Prague'));
