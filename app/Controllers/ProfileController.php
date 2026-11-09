@@ -12,6 +12,7 @@ use App\Core\Session;
 use App\Core\ValidationException;
 use App\Core\Validator;
 use App\Core\View;
+use App\Repositories\VenueRepository;
 use App\Services\UserService;
 
 final class ProfileController
@@ -19,7 +20,8 @@ final class ProfileController
     public function __construct(
         private View $view,
         private Auth $auth,
-        private UserService $userService
+        private UserService $userService,
+        private VenueRepository $venues
     ) {
     }
 
@@ -66,6 +68,19 @@ final class ProfileController
         Flash::set('success', 'Profil byl uložen.');
 
         return Response::redirect(url('/profil'));
+    }
+
+    public function proposals(Request $request, array $params): Response
+    {
+        $user = $this->auth->user();
+        if ($user === null) {
+            abort(403);
+        }
+
+        return Response::html($this->view->render('profile/proposals', [
+            'title' => 'Moje návrhy',
+            'venues' => $this->venues->proposalsForUser((int) $user['id']),
+        ]));
     }
 
     public function password(Request $request, array $params): Response

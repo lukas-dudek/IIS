@@ -9,6 +9,12 @@ $isLogin = $current === rtrim(url('/prihlaseni'), '/');
 $isRegister = $current === rtrim(url('/registrace'), '/');
 $isProfile = str_starts_with($current . '/', rtrim(url('/profil'), '/') . '/');
 $isAdminUsers = str_starts_with($current . '/', rtrim(url('/admin/uzivatele'), '/') . '/');
+$isVenues = $current === rtrim(url('/mista'), '/')
+    || str_starts_with($current . '/', rtrim(url('/mista'), '/') . '/');
+$isProposals = $current === rtrim(url('/moje-navrhy'), '/');
+$isModerationVenues = str_starts_with($current . '/', rtrim(url('/moderace/mista'), '/') . '/');
+$isModerator = $user !== null && in_array($user['role'], ['moderator', 'admin'], true);
+$isAdmin = $user !== null && $user['role'] === 'admin';
 ?>
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container">
@@ -23,7 +29,18 @@ $isAdminUsers = str_starts_with($current . '/', rtrim(url('/admin/uzivatele'), '
                     <a class="nav-link<?= $isHome ? ' active' : '' ?>" href="<?= e(url('/')) ?>"
                        <?= $isHome ? 'aria-current="page"' : '' ?>>Domů</a>
                 </li>
-                <?php if ($user !== null && $user['role'] === 'admin'): ?>
+                <li class="nav-item">
+                    <a class="nav-link<?= $isVenues ? ' active' : '' ?>" href="<?= e(url('/mista')) ?>"
+                       <?= $isVenues ? 'aria-current="page"' : '' ?>>Místa</a>
+                </li>
+                <?php if ($isModerator): ?>
+                    <li class="nav-item">
+                        <a class="nav-link<?= $isModerationVenues ? ' active' : '' ?>"
+                           href="<?= e(url('/moderace/mista')) ?>"
+                           <?= $isModerationVenues ? 'aria-current="page"' : '' ?>>Moderace míst</a>
+                    </li>
+                <?php endif; ?>
+                <?php if ($isAdmin): ?>
                     <li class="nav-item">
                         <a class="nav-link<?= $isAdminUsers ? ' active' : '' ?>" href="<?= e(url('/admin/uzivatele')) ?>"
                            <?= $isAdminUsers ? 'aria-current="page"' : '' ?>>Administrace</a>
@@ -44,6 +61,10 @@ $isAdminUsers = str_starts_with($current . '/', rtrim(url('/admin/uzivatele'), '
                 </ul>
             <?php else: ?>
                 <ul class="navbar-nav align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link<?= $isProposals ? ' active' : '' ?>" href="<?= e(url('/moje-navrhy')) ?>"
+                           <?= $isProposals ? 'aria-current="page"' : '' ?>>Moje návrhy</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link<?= $isProfile ? ' active' : '' ?>" href="<?= e(url('/profil')) ?>"
                            <?= $isProfile ? 'aria-current="page"' : '' ?>><?= e($user['name']) ?></a>

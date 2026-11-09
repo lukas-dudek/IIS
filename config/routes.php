@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
 use App\Controllers\HomeController;
+use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
+use App\Controllers\VenueController;
 
 return [
     [
@@ -133,5 +135,117 @@ return [
         'controller' => AdminUserController::class,
         'action' => 'delete',
         'middleware' => ['auth', 'role:admin'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/mista',
+        'controller' => VenueController::class,
+        'action' => 'index',
+        'middleware' => [],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/mista/navrhnout',
+        'controller' => VenueController::class,
+        'action' => 'propose',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/mista/navrhnout',
+        'controller' => VenueController::class,
+        'action' => 'propose',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/mista/{id}',
+        'controller' => VenueController::class,
+        'action' => 'show',
+        'middleware' => [],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/mista/{id}/upravit',
+        'controller' => VenueController::class,
+        'action' => 'editProposal',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/mista/{id}/upravit',
+        'controller' => VenueController::class,
+        'action' => 'editProposal',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moje-navrhy',
+        'controller' => ProfileController::class,
+        'action' => 'proposals',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/mista',
+        'controller' => ModerationController::class,
+        'action' => 'venues',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/mista/novy',
+        'controller' => ModerationController::class,
+        'action' => 'createVenue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/mista/novy',
+        'controller' => ModerationController::class,
+        'action' => 'createVenue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/mista/{id}',
+        'controller' => ModerationController::class,
+        'action' => 'venue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/mista/{id}/upravit',
+        'controller' => ModerationController::class,
+        'action' => 'editVenue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/mista/{id}/upravit',
+        'controller' => ModerationController::class,
+        'action' => 'editVenue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/mista/{id}/schvalit',
+        'controller' => ModerationController::class,
+        'action' => 'approveVenue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/mista/{id}/zamitnout',
+        'controller' => ModerationController::class,
+        'action' => 'rejectVenue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/mista/{id}/smazat',
+        'controller' => ModerationController::class,
+        'action' => 'deleteVenue',
+        'middleware' => ['auth', 'role:moderator'],
     ],
 ];

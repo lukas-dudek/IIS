@@ -24,7 +24,10 @@ final class Upload
             throw new RuntimeException('Neplatná složka pro upload.');
         }
 
-        $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+        $error = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+        if (!is_int($error)) {
+            throw new RuntimeException('Soubor se nepodařilo nahrát.');
+        }
         if ($error !== UPLOAD_ERR_OK) {
             throw new RuntimeException($this->uploadError($error));
         }
@@ -62,6 +65,21 @@ final class Upload
         }
 
         return $folder . '/' . $name;
+    }
+
+    public function delete(?string $relativePath): void
+    {
+        if ($relativePath === null || $relativePath === '') {
+            return;
+        }
+        if (preg_match('#^[a-z0-9_-]+/[a-f0-9]{32}\.(jpg|png|webp)$#', $relativePath) !== 1) {
+            return;
+        }
+
+        $file = rtrim($this->directory, '/') . '/' . $relativePath;
+        if (is_file($file)) {
+            @unlink($file);
+        }
     }
 
     private function uploadError(int $error): string

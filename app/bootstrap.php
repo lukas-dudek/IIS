@@ -12,8 +12,10 @@ use App\Core\Upload;
 use App\Core\View;
 use App\Core\Authorization;
 use App\Repositories\UserRepository;
+use App\Repositories\VenueRepository;
 use App\Services\AuthService;
 use App\Services\UserService;
+use App\Services\VenueService;
 
 if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
@@ -35,6 +37,7 @@ spl_autoload_register(static function (string $class): void {
 require APP_ROOT . '/app/Support/helpers.php';
 require APP_ROOT . '/app/Support/dates.php';
 require APP_ROOT . '/app/Support/slug.php';
+require APP_ROOT . '/app/Support/venue_form.php';
 
 $configFile = APP_ROOT . '/config/config.php';
 if (!is_file($configFile)) {
@@ -78,6 +81,8 @@ $upload = new Upload(
     (string) $config->get('upload.dir', APP_ROOT . '/public/uploads'),
     (int) $config->get('upload.max_bytes', 2 * 1024 * 1024)
 );
+$venues = new VenueRepository($database);
+$venueService = new VenueService($venues, $upload);
 
 $request = Request::fromGlobals();
 
@@ -96,5 +101,7 @@ return [
     'view' => $view,
     'logger' => $logger,
     'upload' => $upload,
+    'venues' => $venues,
+    'venueService' => $venueService,
     'request' => $request,
 ];
