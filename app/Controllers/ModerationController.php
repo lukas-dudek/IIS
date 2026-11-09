@@ -14,8 +14,11 @@ use App\Core\ValidationException;
 use App\Core\Validator;
 use App\Core\View;
 use App\Repositories\CommentRepository;
+use App\Repositories\EventRepository;
+use App\Repositories\TicketTypeRepository;
 use App\Repositories\VenueRepository;
 use App\Services\CategoryService;
+use App\Services\EventService;
 use App\Services\FeedbackService;
 use App\Services\VenueService;
 
@@ -28,7 +31,10 @@ final class ModerationController
         private VenueService $venueService,
         private CategoryService $categoryService,
         private CommentRepository $comments,
-        private FeedbackService $feedbackService
+        private FeedbackService $feedbackService,
+        private EventRepository $events,
+        private TicketTypeRepository $tickets,
+        private EventService $eventService
     ) {
     }
 
@@ -421,6 +427,145 @@ final class ModerationController
         Flash::set('success', 'Komentář byl zobrazen.');
 
         return Response::redirect(url('/moderace/komentare'));
+    }
+
+    public function index(Request $request, array $params): Response
+    {
+        $pendingEvents = $this->events->pendingForModeration();
+        $pendingVenues = array_values(array_filter(
+            $this->venues->allForModeration(),
+            static fn (array $venue): bool => $venue['status'] === 'pending'
+        ));
+        $pendingCategories = array_values(array_filter(
+            $this->categoryService->moderationFlat(),
+            static fn (array $category): bool => $category['status'] === 'pending'
+        ));
+        $hiddenComments = $this->comments->forModeration('hidden', null);
+
+        return Response::html($this->view->render('moderation/index', [
+            'title' => 'Moderace',
+            'pendingEventsCount' => count($pendingEvents),
+            'pendingVenuesCount' => count($pendingVenues),
+            'pendingCategoriesCount' => count($pendingCategories),
+            'hiddenCommentsCount' => count($hiddenComments),
+        ]));
+    }
+
+    public function events(Request $request, array $params): Response
+    {
+        $events = $this->events->pendingForModeration();
+        foreach ($events as &$event) {
+            $event['tickets'] = $this->tickets->forEvent((int) $event['id']);
+            $event['collisions'] = $this->events->collisionsForEvent($event);
+            $event['active_registrations'] = $this->events->activeRegistrationCount((int) $event['id']);
+        }
+        unset($event);
+
+        return Response::html($this->view->render('moderation/events', [
+            'title' => 'Moderace událostí',
+            'events' => $events,
+        ]));
+    }
+
+    public function event(Request $request, array $params): Response
+    {
+        $id = (int) ($params['id'] ?? 0);
+        if ($id <= 0) {
+            abort(404);
+        }
+        $event = $this->events->findForModeration($id);
+        if ($event === null) {
+            abort(404);
+        }
+
+        return $this->renderEvent(
+            $event,
+            $this->tickets->forEventWithAvailability($id),
+            $this->events->collisionsForEvent($event),
+            '',
+            [],
+            200
+        );
+    }
+
+    public function approveEvent(Request $request, array $params): Response
+    {
+        $id = (int) ($params['id'] ?? 0);
+        if ($id <= 0) {
+            abort(404);
+        }
+
+        try {
+            $this->eventService->approve($id, (int) $this->auth->id());
+            Flash::set('success', 'Událost byla schválena.');
+        } catch (BusinessRuleException $exception) {
+            Flash::set('danger', $exception->getMessage());
+        }
+
+        return Response::redirect(url('/moderace/udalosti/' . $id));
+    }
+
+    public function rejectEvent(Request $request, array $params): Response
+    {
+        $id = (int) ($params['id'] ?? 0);
+        if ($id <= 0) {
+            abort(404);
+        }
+        $event = $this->events->findForModeration($id);
+        if ($event === null) {
+            abort(404);
+        }
+        $reason = trim((string) $request->post('reason', ''));
+        $validator = new Validator(['reason' => $reason], ['reason' => 'Důvod zamítnutí']);
+        $validator->required('reason')->length('reason', 3, 255);
+        if ($validator->fails()) {
+            return $this->renderEvent(
+                $event,
+                $this->tickets->forEventWithAvailability($id),
+                $this->events->collisionsForEvent($event),
+                $reason,
+                $validator->errors(),
+                422
+            );
+        }
+
+        try {
+            $this->eventService->reject($id, (int) $this->auth->id(), $reason);
+            Flash::set('success', 'Událost byla zamítnuta.');
+        } catch (BusinessRuleException $exception) {
+            Flash::set('danger', $exception->getMessage());
+        } catch (ValidationException $exception) {
+            return $this->renderEvent(
+                $event,
+                $this->tickets->forEventWithAvailability($id),
+                $this->events->collisionsForEvent($event),
+                $reason,
+                $exception->errors(),
+                422
+            );
+        }
+
+        return Response::redirect(url('/moderace/udalosti/' . $id));
+    }
+
+    private function renderEvent(
+        array $event,
+        array $tickets,
+        array $collisions,
+        string $reason,
+        array $reasonErrors,
+        int $status
+    ): Response {
+        $event['active_registrations'] = $this->events->activeRegistrationCount((int) $event['id']);
+
+        return Response::html($this->view->render('moderation/event', [
+            'title' => 'Moderace události',
+            'event' => $event,
+            'tickets' => $tickets,
+            'collisions' => $collisions,
+            'reason' => $reason,
+            'reasonErrors' => $reasonErrors,
+        ]), $status);
     }
 
     private function renderVenueForm(

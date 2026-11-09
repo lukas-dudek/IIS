@@ -19,7 +19,8 @@ $isProposals = $current === rtrim(url('/moje-navrhy'), '/');
 $isMyEvents = $current === rtrim(url('/moje-udalosti'), '/');
 $isMyRegistrations = $current === rtrim(url('/moje-registrace'), '/');
 $isCalendar = $current === rtrim(url('/muj-kalendar'), '/');
-$isModeration = str_starts_with($current . '/', rtrim(url('/moderace'), '/') . '/');
+$isModeration = $current === rtrim(url('/moderace'), '/')
+    || str_starts_with($current . '/', rtrim(url('/moderace'), '/') . '/');
 $isModerator = $user !== null && in_array($user['role'], ['moderator', 'admin'], true);
 $isAdmin = $user !== null && $user['role'] === 'admin';
 ?>
@@ -47,7 +48,7 @@ $isAdmin = $user !== null && $user['role'] === 'admin';
                 <?php if ($isModerator): ?>
                     <li class="nav-item">
                         <a class="nav-link<?= $isModeration ? ' active' : '' ?>"
-                           href="<?= e(url('/moderace/mista')) ?>"
+                           href="<?= e(url('/moderace')) ?>"
                            <?= $isModeration ? 'aria-current="page"' : '' ?>>Moderace</a>
                     </li>
                 <?php endif; ?>

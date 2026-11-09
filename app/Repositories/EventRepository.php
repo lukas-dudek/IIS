@@ -230,6 +230,25 @@ final class EventRepository
         return $event === false ? null : $event;
     }
 
+    public function collisionsForEvent(array $event): array
+    {
+        $statement = $this->database->pdo()->prepare(
+            "SELECT id, title, status, starts_at, ends_at
+             FROM events
+             WHERE venue_id = ? AND id <> ? AND status IN ('approved', 'pending')
+               AND starts_at < ? AND ends_at > ?
+             ORDER BY starts_at ASC"
+        );
+        $statement->execute([
+            (int) $event['venue_id'],
+            (int) $event['id'],
+            $event['ends_at'],
+            $event['starts_at'],
+        ]);
+
+        return $statement->fetchAll();
+    }
+
     public function pendingForModeration(): array
     {
         $statement = $this->database->pdo()->query(
