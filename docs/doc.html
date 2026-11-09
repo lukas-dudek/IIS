@@ -420,7 +420,7 @@ PHP_BIN=php ./bin/check.sh
 
 <h3>Automatizované testy</h3>
 <p><strong>Výsledek:</strong> <span class="badge ok">77 testů, 279 asercí, OK</span> (9. 11. 2026)</p>
-<p class="small">GitHub Actions běží na <code>main</code> a u každého PR; spouští <code>./bin/check.sh</code> (PHP lint, zakázané vzory, unit testy). Integrační testy vyžadují lokální databázi a běží s <code>IIS_DB_PASSWORD</code>.</p>
+<p class="small">Workflow CI je nastavený pro push do <code>main</code> a pro každý PR: PHP 8.1, MariaDB service, <code>composer install</code>, <code>./bin/check.sh</code> a plné PHPUnit včetně integračních testů s <code>IIS_DB_PASSWORD</code>. Běh v cloudu se ověří po prvním pushi; lokálně projíždí stejné příkazy.</p>
 <table>
     <tr><th>Typ</th><th>Soubor</th><th>Co ověřuje</th></tr>
     <tr><td>Unit</td><td><code>IcsTest</code></td><td>validní ICS, escape, fold, UID, UTC časy</td></tr>
