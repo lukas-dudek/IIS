@@ -23,8 +23,8 @@
 # Uživatelské uploady
 /public/uploads/*
 !/public/uploads/.gitkeep
+!/public/uploads/.htaccess
 # Až přibude .htaccess a demo data, výjimky se doplní:
-# !/public/uploads/.htaccess
 # !/public/uploads/demo/
 # !/public/uploads/demo/**
 
