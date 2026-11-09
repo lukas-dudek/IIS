@@ -13,6 +13,7 @@ use App\Core\ValidationException;
 use App\Core\Validator;
 use App\Core\View;
 use App\Repositories\VenueRepository;
+use App\Services\CategoryService;
 use App\Services\UserService;
 
 final class ProfileController
@@ -21,7 +22,8 @@ final class ProfileController
         private View $view,
         private Auth $auth,
         private UserService $userService,
-        private VenueRepository $venues
+        private VenueRepository $venues,
+        private CategoryService $categoryService
     ) {
     }
 
@@ -80,6 +82,7 @@ final class ProfileController
         return Response::html($this->view->render('profile/proposals', [
             'title' => 'Moje návrhy',
             'venues' => $this->venues->proposalsForUser((int) $user['id']),
+            'categories' => $this->categoryService->proposalsForUser((int) $user['id']),
         ]));
     }
 

@@ -11,9 +11,11 @@ use App\Core\Session;
 use App\Core\Upload;
 use App\Core\View;
 use App\Core\Authorization;
+use App\Repositories\CategoryRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\VenueRepository;
 use App\Services\AuthService;
+use App\Services\CategoryService;
 use App\Services\UserService;
 use App\Services\VenueService;
 
@@ -38,6 +40,7 @@ require APP_ROOT . '/app/Support/helpers.php';
 require APP_ROOT . '/app/Support/dates.php';
 require APP_ROOT . '/app/Support/slug.php';
 require APP_ROOT . '/app/Support/venue_form.php';
+require APP_ROOT . '/app/Support/category_form.php';
 
 $configFile = APP_ROOT . '/config/config.php';
 if (!is_file($configFile)) {
@@ -83,6 +86,8 @@ $upload = new Upload(
 );
 $venues = new VenueRepository($database);
 $venueService = new VenueService($venues, $upload);
+$categories = new CategoryRepository($database);
+$categoryService = new CategoryService($categories);
 
 $request = Request::fromGlobals();
 
@@ -103,5 +108,7 @@ return [
     'upload' => $upload,
     'venues' => $venues,
     'venueService' => $venueService,
+    'categories' => $categories,
+    'categoryService' => $categoryService,
     'request' => $request,
 ];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
+use App\Controllers\CategoryController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
@@ -246,6 +247,97 @@ return [
         'pattern' => '/moderace/mista/{id}/smazat',
         'controller' => ModerationController::class,
         'action' => 'deleteVenue',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/kategorie/navrhnout',
+        'controller' => CategoryController::class,
+        'action' => 'propose',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/kategorie/navrhnout',
+        'controller' => CategoryController::class,
+        'action' => 'propose',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/kategorie/{id}/upravit',
+        'controller' => CategoryController::class,
+        'action' => 'editProposal',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/kategorie/{id}/upravit',
+        'controller' => CategoryController::class,
+        'action' => 'editProposal',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/kategorie',
+        'controller' => ModerationController::class,
+        'action' => 'categories',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/kategorie/nova',
+        'controller' => ModerationController::class,
+        'action' => 'createCategory',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/kategorie/nova',
+        'controller' => ModerationController::class,
+        'action' => 'createCategory',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/kategorie/{id}',
+        'controller' => ModerationController::class,
+        'action' => 'category',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/kategorie/{id}/upravit',
+        'controller' => ModerationController::class,
+        'action' => 'editCategory',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/kategorie/{id}/upravit',
+        'controller' => ModerationController::class,
+        'action' => 'editCategory',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/kategorie/{id}/schvalit',
+        'controller' => ModerationController::class,
+        'action' => 'approveCategory',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/kategorie/{id}/zamitnout',
+        'controller' => ModerationController::class,
+        'action' => 'rejectCategory',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/kategorie/{id}/smazat',
+        'controller' => ModerationController::class,
+        'action' => 'deleteCategory',
         'middleware' => ['auth', 'role:moderator'],
     ],
 ];

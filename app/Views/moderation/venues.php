@@ -7,6 +7,8 @@ declare(strict_types=1);
     <a class="btn btn-primary" href="<?= e(url('/moderace/mista/novy')) ?>">Nové místo</a>
 </div>
 
+<?php require __DIR__ . '/_nav.php'; ?>
+
 <?php if ($venues === []): ?>
     <div class="alert alert-info">Zatím tu nejsou žádná místa.</div>
 <?php else: ?>
@@ -43,7 +45,7 @@ declare(strict_types=1);
                             default => 'warning',
                         };
                         ?>
-                        <span class="badge text-bg-<?= $badge ?>"><?= e(venue_status_label($item['status'])) ?></span>
+                        <span class="badge text-bg-<?= $badge ?>"><?= e(moderation_status_label($item['status'])) ?></span>
                     </td>
                     <td class="small"><?= e($item['proposer_name']) ?></td>
                     <td class="small"><?= e(format_datetime($item['created_at']) ?: '—') ?></td>

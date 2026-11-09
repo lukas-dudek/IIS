@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
+use App\Controllers\CategoryController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
@@ -29,10 +30,11 @@ $controllerFactory = static function (string $controller) use ($app): object {
     return match ($controller) {
         HomeController::class => new HomeController($app['view']),
         AuthController::class => new AuthController($app['view'], $app['auth'], $app['authService']),
-        ProfileController::class => new ProfileController($app['view'], $app['auth'], $app['userService'], $app['venues']),
+        ProfileController::class => new ProfileController($app['view'], $app['auth'], $app['userService'], $app['venues'], $app['categoryService']),
         AdminUserController::class => new AdminUserController($app['view'], $app['auth'], $app['userService']),
         VenueController::class => new VenueController($app['view'], $app['auth'], $app['venues'], $app['venueService']),
-        ModerationController::class => new ModerationController($app['view'], $app['auth'], $app['venues'], $app['venueService']),
+        ModerationController::class => new ModerationController($app['view'], $app['auth'], $app['venues'], $app['venueService'], $app['categoryService']),
+        CategoryController::class => new CategoryController($app['view'], $app['auth'], $app['categoryService']),
         default => throw new RuntimeException('Neznámý controller: ' . $controller),
     };
 };

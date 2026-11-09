@@ -66,7 +66,7 @@ function role_label(string $role): string
     };
 }
 
-function venue_status_label(string $status): string
+function moderation_status_label(string $status): string
 {
     return match ($status) {
         'pending' => 'Čeká na schválení',

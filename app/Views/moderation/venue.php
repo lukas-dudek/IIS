@@ -17,12 +17,14 @@ $badge = match ($venue['status']) {
     </a>
 </div>
 
+<?php require __DIR__ . '/_nav.php'; ?>
+
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="bg-white border rounded-3 p-4">
             <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
                 <h1 class="h3 mb-0"><?= e($venue['name']) ?></h1>
-                <span class="badge text-bg-<?= $badge ?>"><?= e(venue_status_label($venue['status'])) ?></span>
+                <span class="badge text-bg-<?= $badge ?>"><?= e(moderation_status_label($venue['status'])) ?></span>
             </div>
 
             <p class="mb-3">
