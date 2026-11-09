@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Controllers\AuthController;
 use App\Controllers\HomeController;
+use App\Controllers\ProfileController;
 use App\Core\HttpException;
 use App\Core\Response;
 use App\Core\Router;
@@ -23,6 +25,8 @@ $routes = require dirname(__DIR__) . '/config/routes.php';
 $controllerFactory = static function (string $controller) use ($app): object {
     return match ($controller) {
         HomeController::class => new HomeController($app['view']),
+        AuthController::class => new AuthController($app['view'], $app['auth'], $app['authService']),
+        ProfileController::class => new ProfileController($app['view'], $app['auth'], $app['userService']),
         default => throw new RuntimeException('Neznámý controller: ' . $controller),
     };
 };

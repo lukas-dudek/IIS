@@ -35,7 +35,8 @@ final class Upload
             throw new RuntimeException('Soubor se nepodařilo načíst.');
         }
         if ($size > $this->maxBytes) {
-            throw new RuntimeException('Soubor je příliš velký. Maximum je 2 MB.');
+            $megabytes = max(1, (int) round($this->maxBytes / 1024 / 1024));
+            throw new RuntimeException(sprintf('Soubor je příliš velký. Maximum je %d MB.', $megabytes));
         }
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);

@@ -12,6 +12,8 @@ use App\Core\Upload;
 use App\Core\View;
 use App\Core\Authorization;
 use App\Repositories\UserRepository;
+use App\Services\AuthService;
+use App\Services\UserService;
 
 if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
@@ -48,9 +50,14 @@ if (!defined('BASE_PATH')) {
 date_default_timezone_set((string) $config->get('app.timezone', 'Europe/Prague'));
 
 $debug = (bool) $config->get('app.debug', false);
+$logDir = (string) $config->get('log.dir', APP_ROOT . '/storage/logs');
+if (!is_dir($logDir) && !mkdir($logDir, 0775, true) && !is_dir($logDir)) {
+    throw new RuntimeException('Nelze vytvořit adresář pro logy: ' . $logDir);
+}
 error_reporting(E_ALL);
 ini_set('display_errors', $debug ? '1' : '0');
 ini_set('log_errors', '1');
+ini_set('error_log', $logDir . '/php-' . gmdate('Y-m-d') . '.log');
 
 Session::start(
     (int) $config->get('session.timeout', 1800),
@@ -62,9 +69,11 @@ Session::start(
 $database = new Database($config);
 $users = new UserRepository($database);
 $auth = new Auth($users);
+$authService = new AuthService($users);
+$userService = new UserService($users);
 $authorization = new Authorization($auth);
 $view = new View(APP_ROOT . '/app/Views');
-$logger = new Logger((string) $config->get('log.dir', APP_ROOT . '/storage/logs'));
+$logger = new Logger($logDir);
 $upload = new Upload(
     (string) $config->get('upload.dir', APP_ROOT . '/public/uploads'),
     (int) $config->get('upload.max_bytes', 2 * 1024 * 1024)
@@ -81,6 +90,8 @@ return [
     'database' => $database,
     'users' => $users,
     'auth' => $auth,
+    'authService' => $authService,
+    'userService' => $userService,
     'authorization' => $authorization,
     'view' => $view,
     'logger' => $logger,

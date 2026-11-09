@@ -147,6 +147,19 @@ final class Validator
         return $this;
     }
 
+    public function noNullBytes(string $field): self
+    {
+        if ($this->skip($field)) {
+            return $this;
+        }
+
+        if (str_contains((string) $this->value($field), "\0")) {
+            $this->add($field, 'obsahuje neplatný znak.');
+        }
+
+        return $this;
+    }
+
     public function fails(): bool
     {
         return $this->errors !== [];

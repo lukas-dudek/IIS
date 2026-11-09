@@ -33,4 +33,9 @@ final class Csrf
             . htmlspecialchars(self::token(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')
             . '">';
     }
+
+    public static function rotate(): void
+    {
+        unset($_SESSION[self::KEY]);
+    }
 }

@@ -24,9 +24,11 @@ final class Auth
 
         $id = Session::get('user_id');
         $version = Session::get('auth_version');
-        if (!is_int($id) || !is_int($version)) {
+        if (!is_numeric($id) || !is_numeric($version)) {
             return null;
         }
+        $id = (int) $id;
+        $version = (int) $version;
 
         $user = $this->users->findActiveById($id);
         if ($user === null || (int) $user['auth_version'] !== $version) {
@@ -72,6 +74,7 @@ final class Auth
         Session::set('user_id', (int) $user['id']);
         Session::set('auth_version', (int) $user['auth_version']);
         Session::set('_last_activity', time());
+        Csrf::rotate();
 
         $this->user = $user;
         $this->loaded = true;
@@ -82,6 +85,7 @@ final class Auth
         Session::remove('user_id');
         Session::remove('auth_version');
         Session::remove('_last_activity');
+        Csrf::rotate();
 
         $this->user = null;
         $this->loaded = true;
