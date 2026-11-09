@@ -23,5 +23,6 @@ declare(strict_types=1);
     </div>
 </footer>
 <script src="<?= e(asset('vendor/bootstrap.bundle.min.js')) ?>"></script>
+<script src="<?= e(asset('js/app.js')) ?>"></script>
 </body>
 </html>

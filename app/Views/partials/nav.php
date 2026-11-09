@@ -8,6 +8,7 @@ $isHome = $current === $homePath;
 $isLogin = $current === rtrim(url('/prihlaseni'), '/');
 $isRegister = $current === rtrim(url('/registrace'), '/');
 $isProfile = str_starts_with($current . '/', rtrim(url('/profil'), '/') . '/');
+$isAdminUsers = str_starts_with($current . '/', rtrim(url('/admin/uzivatele'), '/') . '/');
 ?>
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container">
@@ -22,6 +23,12 @@ $isProfile = str_starts_with($current . '/', rtrim(url('/profil'), '/') . '/');
                     <a class="nav-link<?= $isHome ? ' active' : '' ?>" href="<?= e(url('/')) ?>"
                        <?= $isHome ? 'aria-current="page"' : '' ?>>Domů</a>
                 </li>
+                <?php if ($user !== null && $user['role'] === 'admin'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link<?= $isAdminUsers ? ' active' : '' ?>" href="<?= e(url('/admin/uzivatele')) ?>"
+                           <?= $isAdminUsers ? 'aria-current="page"' : '' ?>>Administrace</a>
+                    </li>
+                <?php endif; ?>
             </ul>
 
             <?php if ($user === null): ?>

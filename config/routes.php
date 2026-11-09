@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
 use App\Controllers\HomeController;
 use App\Controllers\ProfileController;
@@ -69,5 +70,68 @@ return [
         'controller' => ProfileController::class,
         'action' => 'password',
         'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/admin/uzivatele',
+        'controller' => AdminUserController::class,
+        'action' => 'index',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/admin/uzivatele/novy',
+        'controller' => AdminUserController::class,
+        'action' => 'create',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/admin/uzivatele/novy',
+        'controller' => AdminUserController::class,
+        'action' => 'create',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/admin/uzivatele/{id}/upravit',
+        'controller' => AdminUserController::class,
+        'action' => 'edit',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/admin/uzivatele/{id}/upravit',
+        'controller' => AdminUserController::class,
+        'action' => 'edit',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/admin/uzivatele/{id}/heslo',
+        'controller' => AdminUserController::class,
+        'action' => 'resetPassword',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/admin/uzivatele/{id}/deaktivovat',
+        'controller' => AdminUserController::class,
+        'action' => 'deactivate',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/admin/uzivatele/{id}/aktivovat',
+        'controller' => AdminUserController::class,
+        'action' => 'activate',
+        'middleware' => ['role:admin'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/admin/uzivatele/{id}/smazat',
+        'controller' => AdminUserController::class,
+        'action' => 'delete',
+        'middleware' => ['role:admin'],
     ],
 ];

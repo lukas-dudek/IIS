@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
 use App\Controllers\HomeController;
 use App\Controllers\ProfileController;
@@ -27,6 +28,7 @@ $controllerFactory = static function (string $controller) use ($app): object {
         HomeController::class => new HomeController($app['view']),
         AuthController::class => new AuthController($app['view'], $app['auth'], $app['authService']),
         ProfileController::class => new ProfileController($app['view'], $app['auth'], $app['userService']),
+        AdminUserController::class => new AdminUserController($app['view'], $app['auth'], $app['userService']),
         default => throw new RuntimeException('Neznámý controller: ' . $controller),
     };
 };

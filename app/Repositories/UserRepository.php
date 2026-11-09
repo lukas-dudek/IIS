@@ -75,16 +75,103 @@ final class UserRepository
         return $statement->fetchColumn() !== false;
     }
 
-    public function create(string $username, string $email, string $passwordHash, string $name): int
+    public function create(string $username, string $email, string $passwordHash, string $name, string $role = 'user'): int
     {
         $now = now_utc();
         $statement = $this->database->pdo()->prepare(
             "INSERT INTO users (username, email, password_hash, name, role, is_active, auth_version, created_at, updated_at)
-             VALUES (?, ?, ?, ?, 'user', 1, 1, ?, ?)"
+             VALUES (?, ?, ?, ?, ?, 1, 1, ?, ?)"
         );
-        $statement->execute([$username, mb_strtolower($email), $passwordHash, $name, $now, $now]);
+        $statement->execute([$username, mb_strtolower($email), $passwordHash, $name, $role, $now, $now]);
 
         return (int) $this->database->pdo()->lastInsertId();
+    }
+
+    public function searchForAdmin(string $query, string $role, ?bool $active): array
+    {
+        $sql = 'SELECT id, username, email, name, role, is_active, auth_version, created_at, last_login_at FROM users WHERE 1 = 1';
+        $params = [];
+
+        if ($query !== '') {
+            $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $query) . '%';
+            $sql .= ' AND (username LIKE ? OR email LIKE ? OR name LIKE ?)';
+            array_push($params, $like, $like, $like);
+        }
+        if ($role !== '') {
+            $sql .= ' AND role = ?';
+            $params[] = $role;
+        }
+        if ($active !== null) {
+            $sql .= ' AND is_active = ?';
+            $params[] = $active ? 1 : 0;
+        }
+
+        $sql .= ' ORDER BY role ASC, username ASC';
+        $statement = $this->database->pdo()->prepare($sql);
+        $statement->execute($params);
+
+        return $statement->fetchAll();
+    }
+
+    public function countActiveAdmins(): int
+    {
+        return (int) $this->database->pdo()
+            ->query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND is_active = 1")
+            ->fetchColumn();
+    }
+
+    public function countReferences(int $id): int
+    {
+        $statement = $this->database->pdo()->prepare(
+            'SELECT
+                (SELECT COUNT(*) FROM events WHERE manager_id = ?) +
+                (SELECT COUNT(*) FROM registrations WHERE user_id = ?) +
+                (SELECT COUNT(*) FROM comments WHERE user_id = ?) +
+                (SELECT COUNT(*) FROM ratings WHERE user_id = ?) +
+                (SELECT COUNT(*) FROM venues WHERE proposed_by = ?) +
+                (SELECT COUNT(*) FROM categories WHERE proposed_by = ?) AS total'
+        );
+        $statement->execute([$id, $id, $id, $id, $id, $id]);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    public function updateUser(int $id, string $name, string $email, string $role, bool $bumpAuthVersion): int
+    {
+        $sql = 'UPDATE users SET name = ?, email = ?, role = ?, updated_at = ?';
+        $params = [$name, mb_strtolower($email), $role, now_utc()];
+        if ($bumpAuthVersion) {
+            $sql .= ', auth_version = auth_version + 1';
+        }
+        $sql .= ' WHERE id = ?';
+        $params[] = $id;
+
+        $statement = $this->database->pdo()->prepare($sql);
+        $statement->execute($params);
+
+        $statement = $this->database->pdo()->prepare('SELECT auth_version FROM users WHERE id = ?');
+        $statement->execute([$id]);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    public function setActive(int $id, bool $active): int
+    {
+        $statement = $this->database->pdo()->prepare(
+            'UPDATE users SET is_active = ?, auth_version = auth_version + 1, updated_at = ? WHERE id = ?'
+        );
+        $statement->execute([$active ? 1 : 0, now_utc(), $id]);
+
+        $statement = $this->database->pdo()->prepare('SELECT auth_version FROM users WHERE id = ?');
+        $statement->execute([$id]);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    public function delete(int $id): void
+    {
+        $statement = $this->database->pdo()->prepare('DELETE FROM users WHERE id = ?');
+        $statement->execute([$id]);
     }
 
     public function updateProfile(int $id, string $name, string $email): void

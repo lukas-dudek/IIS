@@ -56,6 +56,16 @@ function checked(bool $condition): string
     return $condition ? ' checked' : '';
 }
 
+function role_label(string $role): string
+{
+    return match ($role) {
+        'admin' => 'Administrátor',
+        'moderator' => 'Moderátor',
+        'user' => 'Uživatel',
+        default => $role,
+    };
+}
+
 function abort(int $status, string $message = ''): never
 {
     throw new HttpException($status, $message);

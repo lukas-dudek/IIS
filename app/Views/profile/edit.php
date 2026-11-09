@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 $profileFirstError = array_key_first($profileErrors);
 $passwordFirstError = array_key_first($passwordErrors);
-$roleLabels = ['admin' => 'Administrátor', 'moderator' => 'Moderátor', 'user' => 'Uživatel'];
 ?>
 <div class="row g-4">
     <div class="col-lg-7">
@@ -112,7 +111,7 @@ $roleLabels = ['admin' => 'Administrátor', 'moderator' => 'Moderátor', 'user' 
                 <dt class="col-5">Uživatelské jméno</dt>
                 <dd class="col-7"><?= e($user['username']) ?></dd>
                 <dt class="col-5">Role</dt>
-                <dd class="col-7"><?= e($roleLabels[$user['role']] ?? $user['role']) ?></dd>
+                <dd class="col-7"><?= e(role_label($user['role'])) ?></dd>
                 <dt class="col-5">Poslední přihlášení</dt>
                 <dd class="col-7"><?= e(format_datetime($user['last_login_at']) ?: '—') ?></dd>
             </dl>
