@@ -225,9 +225,11 @@ $returnPath = '/udalosti/' . $event['slug'];
                     <form method="post" action="<?= e(url('/udalosti/' . $event['slug'] . '/komentar')) ?>">
                         <?= csrf_field() ?>
                         <div class="mb-2">
-                            <label for="body" class="form-label">Váš komentář (nepovinné)</label>
+                            <label for="body" class="form-label">
+                                Váš komentář <span aria-hidden="true">*</span>
+                            </label>
                             <textarea class="form-control" id="body" name="body" rows="4"
-                                      maxlength="2000"></textarea>
+                                      required maxlength="2000"></textarea>
                             <div class="form-text">1–2000 znaků. Komentář můžete později upravit nebo smazat.</div>
                         </div>
                         <button type="submit" class="btn btn-outline-primary">Přidat komentář</button>
