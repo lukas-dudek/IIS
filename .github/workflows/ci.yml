@@ -8,6 +8,20 @@ on:
 jobs:
   php:
     runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: iis
+        options: >-
+          --health-cmd "mariadb-admin ping -u root"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,7 +36,21 @@ jobs:
       - name: Composer install (dev)
         run: composer install --no-progress
 
-      - name: Static check and unit tests
-        run: ./bin/check.sh
+      - name: Wait for MariaDB
+        run: |
+          for i in $(seq 1 30); do
+            mysql --host=127.0.0.1 --protocol=TCP --user=root -e 'SELECT 1' >/dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          echo "MariaDB se nepřipravila." >&2
+          exit 1
+
+      - name: Prepare databases
+        run: ./bin/setup_test_db.sh ci_password mysql
+
+      - name: Static check, unit and integration tests
+        run: |
+          ./bin/check.sh
+          IIS_DB_PASSWORD=ci_password vendor/bin/phpunit
         env:
           PHP_BIN: php
