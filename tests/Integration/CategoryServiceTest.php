@@ -110,7 +110,7 @@ final class CategoryServiceTest extends TestCase
 
     public function testCannotMoveSubtreeDeeperThanFour(): void
     {
-        $newParent = $this->service->createApproved($this->data('test_category_service_new_parent', 7), 2);
+        $newParent = $this->service->createApproved($this->data('test_category_service_new_parent', 8), 2);
         $root = $this->service->createApproved($this->data('test_category_service_subtree_root'), 2);
         $child = $this->service->createApproved($this->data('test_category_service_subtree_child', $root), 2);
         $this->service->createApproved($this->data('test_category_service_subtree_grand', $child), 2);

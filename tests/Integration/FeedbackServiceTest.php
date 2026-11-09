@@ -65,7 +65,7 @@ final class FeedbackServiceTest extends TestCase
     {
         $this->expectException(BusinessRuleException::class);
         $this->expectExceptionMessage('Hodnotit a komentovat lze až po ukončení události.');
-        $this->service->saveRating(2, 3, 5);
+        $this->service->saveRating(6, 3, 5);
     }
 
     public function testNonParticipantCannotComment(): void

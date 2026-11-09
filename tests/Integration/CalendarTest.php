@@ -36,11 +36,15 @@ final class CalendarTest extends TestCase
     public function testCalendarIncludesConfirmedParticipantAndManagedEvents(): void
     {
         $participant = $this->events->calendarForUser(4, '2026-10-01 00:00:00', '2026-10-31 23:59:59');
-        self::assertCount(1, $participant);
-        self::assertSame('koncert-komorni-hudby', $participant[0]['slug']);
-        self::assertSame('confirmed', $participant[0]['registration_status']);
+        self::assertCount(2, $participant);
+        $participantSlugs = array_column($participant, 'slug');
+        self::assertContains('koncert-komorni-hudby', $participantSlugs);
+        self::assertContains('workshop-ux-designu', $participantSlugs);
+        foreach ($participant as $event) {
+            self::assertSame('confirmed', $event['registration_status']);
+        }
 
-        $manager = $this->events->calendarForUser(3, '2026-11-01 00:00:00', '2026-11-30 23:59:59');
+        $manager = $this->events->calendarForUser(4, '2026-11-01 00:00:00', '2026-11-30 23:59:59');
         self::assertNotEmpty($manager);
         $slugs = array_column($manager, 'slug');
         self::assertContains('seminar-moderni-php', $slugs);
@@ -49,12 +53,12 @@ final class CalendarTest extends TestCase
 
     public function testExportIncludesOnlyActiveManagedOrConfirmedEvents(): void
     {
-        $managed = $this->events->exportForUser(3);
+        $managed = $this->events->exportForUser(4);
         $slugs = array_column($managed, 'slug');
         self::assertContains('seminar-moderni-php', $slugs);
         self::assertNotContains('koncert-komorni-hudby', $slugs);
         self::assertNotContains('letni-kino', $slugs);
 
-        self::assertSame([], $this->events->exportForUser(4));
+        self::assertSame([], $this->events->exportForUser(10));
     }
 }

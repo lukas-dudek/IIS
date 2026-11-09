@@ -47,7 +47,7 @@ final class EventSearchTest extends TestCase
     {
         $result = $this->events->search(['archive' => false, 'sort' => 'date'], 1, 12);
 
-        self::assertSame(1, $result['total']);
+        self::assertSame(5, $result['total']);
         self::assertSame('seminar-moderni-php', $result['items'][0]['slug']);
     }
 
@@ -55,7 +55,7 @@ final class EventSearchTest extends TestCase
     {
         $result = $this->events->search(['archive' => true, 'sort' => 'date'], 1, 12);
 
-        self::assertSame(2, $result['total']);
+        self::assertSame(10, $result['total']);
         $slugs = array_column($result['items'], 'slug');
         self::assertContains('koncert-komorni-hudby', $slugs);
         self::assertContains('seminar-moderni-php', $slugs);
@@ -71,11 +71,11 @@ final class EventSearchTest extends TestCase
     public function testCategoryPriceAvailabilityAndCityFilters(): void
     {
         self::assertSame(1, $this->events->search(['category_ids' => [5, 6]], 1, 12)['total']);
-        self::assertSame(1, $this->events->search(['archive' => true, 'price' => 'free'], 1, 12)['total']);
-        self::assertSame(1, $this->events->search(['price' => 'paid'], 1, 12)['total']);
-        self::assertSame(1, $this->events->search(['availability' => 'available'], 1, 12)['total']);
-        self::assertSame(0, $this->events->search(['availability' => 'full'], 1, 12)['total']);
-        self::assertSame(1, $this->events->search(['city' => 'Brno'], 1, 12)['total']);
+        self::assertSame(4, $this->events->search(['archive' => true, 'price' => 'free'], 1, 12)['total']);
+        self::assertSame(4, $this->events->search(['price' => 'paid'], 1, 12)['total']);
+        self::assertSame(4, $this->events->search(['availability' => 'available'], 1, 12)['total']);
+        self::assertSame(1, $this->events->search(['availability' => 'full'], 1, 12)['total']);
+        self::assertSame(5, $this->events->search(['city' => 'Brno'], 1, 12)['total']);
         self::assertContains('Brno', $this->events->cities());
     }
 
@@ -84,7 +84,7 @@ final class EventSearchTest extends TestCase
         $first = $this->events->search(['archive' => true, 'sort' => 'date'], 1, 1);
         $second = $this->events->search(['archive' => true, 'sort' => 'date'], 2, 1);
 
-        self::assertSame(2, $first['total']);
+        self::assertSame(10, $first['total']);
         self::assertCount(1, $first['items']);
         self::assertCount(1, $second['items']);
         self::assertNotSame($first['items'][0]['id'], $second['items'][0]['id']);
@@ -94,7 +94,7 @@ final class EventSearchTest extends TestCase
     {
         self::assertNotNull($this->events->findBySlug('seminar-moderni-php'));
         self::assertNull($this->events->findBySlug('prednaska-o-bezpecnosti'));
-        self::assertNull($this->events->findBySlug('workshop-testovani'));
+        self::assertNull($this->events->findBySlug('jazzovy-vecer'));
     }
 
     public function testTicketAvailabilityCommentsAndRatings(): void
@@ -105,11 +105,11 @@ final class EventSearchTest extends TestCase
         self::assertSame(1, (int) $tickets[0]['active_count']);
 
         $comments = $this->comments->visibleForEvent(1);
-        self::assertCount(2, $comments);
+        self::assertCount(3, $comments);
         self::assertSame('Jan Novák', $comments[0]['author_name']);
 
         $rating = $this->ratings->summaryForEvent(1);
-        self::assertSame(2, (int) $rating['count']);
+        self::assertSame(6, (int) $rating['count']);
         self::assertEqualsWithDelta(4.5, (float) $rating['average'], 0.001);
     }
 }

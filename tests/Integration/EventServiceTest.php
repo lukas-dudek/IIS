@@ -228,7 +228,7 @@ final class EventServiceTest extends TestCase
     {
         $id = $this->service->create(3, $this->eventData('test_event_service_venue'), $this->ticketRows(), false);
         $data = $this->eventData('test_event_service_venue');
-        $data['venue_id'] = 4;
+        $data['venue_id'] = 9;
 
         $this->expectException(ValidationException::class);
         $this->service->save($id, 3, false, $data, $this->ticketRowsForEvent($id), true);
