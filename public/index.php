@@ -6,10 +6,12 @@ use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
 use App\Controllers\CalendarController;
 use App\Controllers\CategoryController;
+use App\Controllers\CommentController;
 use App\Controllers\EventController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
+use App\Controllers\RatingController;
 use App\Controllers\RegistrationController;
 use App\Controllers\VenueController;
 use App\Core\HttpException;
@@ -36,8 +38,10 @@ $controllerFactory = static function (string $controller) use ($app): object {
         ProfileController::class => new ProfileController($app['view'], $app['auth'], $app['userService'], $app['venues'], $app['categoryService']),
         AdminUserController::class => new AdminUserController($app['view'], $app['auth'], $app['userService']),
         VenueController::class => new VenueController($app['view'], $app['auth'], $app['venues'], $app['venueService']),
-        ModerationController::class => new ModerationController($app['view'], $app['auth'], $app['venues'], $app['venueService'], $app['categoryService']),
+        ModerationController::class => new ModerationController($app['view'], $app['auth'], $app['venues'], $app['venueService'], $app['categoryService'], $app['comments'], $app['feedbackService']),
         CategoryController::class => new CategoryController($app['view'], $app['auth'], $app['categoryService']),
+        CommentController::class => new CommentController($app['auth'], $app['events'], $app['comments'], $app['feedbackService']),
+        RatingController::class => new RatingController($app['auth'], $app['events'], $app['feedbackService']),
         EventController::class => new EventController(
             $app['view'],
             $app['auth'],

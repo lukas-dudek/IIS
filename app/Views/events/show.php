@@ -169,11 +169,76 @@ $returnPath = '/udalosti/' . $event['slug'];
             <?php endif; ?>
         </div>
 
-        <div class="bg-white border rounded-3 p-4 mt-4">
-            <h2 class="h5 mb-3">Komentáře</h2>
+        <div class="bg-white border rounded-3 p-4 mt-4" id="hodnoceni">
+            <h2 class="h5 mb-3">Hodnocení a komentáře</h2>
+
             <?php if (!$commentsOpen): ?>
-                <p class="text-muted mb-0">Komentáře a hodnocení se zobrazí po ukončení události.</p>
-            <?php elseif ($comments === []): ?>
+                <p class="text-muted mb-0">Hodnocení a komentáře se zobrazí po ukončení události.</p>
+            <?php elseif (!$canFeedback): ?>
+                <p class="text-muted mb-0">Hodnotit a komentovat mohou jen potvrzení účastníci po ukončení události.</p>
+            <?php else: ?>
+                <form method="post" action="<?= e(url('/udalosti/' . $event['slug'] . '/hodnoceni')) ?>" class="mb-4">
+                    <?= csrf_field() ?>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-sm-5">
+                            <label for="value" class="form-label">Vaše hodnocení <span aria-hidden="true">*</span></label>
+                            <select class="form-select" id="value" name="value" required>
+                                <option value="">— vyberte —</option>
+                                <?php for ($value = 1; $value <= 5; $value++): ?>
+                                    <option value="<?= $value ?>"<?= selected($userRating['value'] ?? '', $value) ?>>
+                                        <?= $value ?> / 5
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="submit" class="btn btn-primary">Uložit hodnocení</button>
+                        </div>
+                    </div>
+                    <div class="form-text">Hodnocení můžete kdykoli změnit.</div>
+                </form>
+
+                <?php if ($userComment !== null): ?>
+                    <?php if ($userComment['status'] === 'hidden'): ?>
+                        <div class="alert alert-warning py-2 small">
+                            Váš komentář je skrytý moderátorem<?= !empty($userComment['hidden_reason']) ? ': ' . e($userComment['hidden_reason']) : '.' ?>
+                        </div>
+                    <?php endif; ?>
+                    <form method="post" action="<?= e(url('/komentar/' . $userComment['id'] . '/upravit')) ?>">
+                        <?= csrf_field() ?>
+                        <div class="mb-2">
+                            <label for="body" class="form-label">Váš komentář</label>
+                            <textarea class="form-control" id="body" name="body" rows="4"
+                                      required maxlength="2000"><?= e($userComment['body']) ?></textarea>
+                            <div class="form-text">1–2000 znaků.</div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="submit" class="btn btn-primary">Uložit komentář</button>
+                        </div>
+                    </form>
+                    <form method="post" action="<?= e(url('/komentar/' . $userComment['id'] . '/smazat')) ?>"
+                          class="mt-2" data-confirm="Opravdu smazat svůj komentář?">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Smazat komentář</button>
+                    </form>
+                <?php else: ?>
+                    <form method="post" action="<?= e(url('/udalosti/' . $event['slug'] . '/komentar')) ?>">
+                        <?= csrf_field() ?>
+                        <div class="mb-2">
+                            <label for="body" class="form-label">Váš komentář (nepovinné)</label>
+                            <textarea class="form-control" id="body" name="body" rows="4"
+                                      maxlength="2000"></textarea>
+                            <div class="form-text">1–2000 znaků. Komentář můžete později upravit nebo smazat.</div>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary">Přidat komentář</button>
+                    </form>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+
+        <div class="bg-white border rounded-3 p-4 mt-4" id="komentare">
+            <h2 class="h5 mb-3">Komentáře účastníků</h2>
+            <?php if ($comments === []): ?>
                 <p class="text-muted mb-0">Zatím žádné komentáře.</p>
             <?php else: ?>
                 <ul class="list-unstyled mb-0">

@@ -13,8 +13,10 @@ use App\Core\Session;
 use App\Core\ValidationException;
 use App\Core\Validator;
 use App\Core\View;
+use App\Repositories\CommentRepository;
 use App\Repositories\VenueRepository;
 use App\Services\CategoryService;
+use App\Services\FeedbackService;
 use App\Services\VenueService;
 
 final class ModerationController
@@ -24,7 +26,9 @@ final class ModerationController
         private Auth $auth,
         private VenueRepository $venues,
         private VenueService $venueService,
-        private CategoryService $categoryService
+        private CategoryService $categoryService,
+        private CommentRepository $comments,
+        private FeedbackService $feedbackService
     ) {
     }
 
@@ -363,6 +367,60 @@ final class ModerationController
             'reason' => $reason,
             'reasonErrors' => $reasonErrors,
         ]), $status);
+    }
+
+    public function comments(Request $request, array $params): Response
+    {
+        $statusRaw = $request->query('stav', '');
+        $status = is_string($statusRaw) && in_array($statusRaw, ['visible', 'hidden'], true)
+            ? $statusRaw
+            : null;
+        $eventRaw = $request->query('udalost', '');
+        $eventId = is_string($eventRaw) && preg_match('/^\d+$/', $eventRaw) === 1
+            ? (int) $eventRaw
+            : null;
+
+        return Response::html($this->view->render('moderation/comments', [
+            'title' => 'Moderace komentářů',
+            'comments' => $this->comments->forModeration($status, $eventId),
+            'events' => $this->comments->moderationEvents(),
+            'status' => $status ?? '',
+            'eventId' => $eventId,
+        ]));
+    }
+
+    public function hideComment(Request $request, array $params): Response
+    {
+        $id = (int) ($params['id'] ?? 0);
+        if ($id <= 0) {
+            abort(404);
+        }
+
+        try {
+            $this->feedbackService->hideComment(
+                $id,
+                (int) $this->auth->id(),
+                (string) $request->post('reason', '')
+            );
+            Flash::set('success', 'Komentář byl skryt.');
+        } catch (ValidationException $exception) {
+            Flash::set('danger', (array_values($exception->errors())[0] ?? null) ?: 'Komentář se nepodařilo skrýt.');
+        }
+
+        return Response::redirect(url('/moderace/komentare'));
+    }
+
+    public function showComment(Request $request, array $params): Response
+    {
+        $id = (int) ($params['id'] ?? 0);
+        if ($id <= 0) {
+            abort(404);
+        }
+
+        $this->feedbackService->showComment($id, (int) $this->auth->id());
+        Flash::set('success', 'Komentář byl zobrazen.');
+
+        return Response::redirect(url('/moderace/komentare'));
     }
 
     private function renderVenueForm(

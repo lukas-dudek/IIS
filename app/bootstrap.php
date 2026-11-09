@@ -22,6 +22,7 @@ use App\Repositories\VenueRepository;
 use App\Services\AuthService;
 use App\Services\CategoryService;
 use App\Services\EventService;
+use App\Services\FeedbackService;
 use App\Services\RegistrationService;
 use App\Services\UserService;
 use App\Services\VenueService;
@@ -104,6 +105,7 @@ $ratings = new RatingRepository($database);
 $registrations = new RegistrationRepository($database);
 $eventService = new EventService($events, $ticketTypes, $venues, $categories, $database);
 $registrationService = new RegistrationService($database, $events, $ticketTypes, $registrations);
+$feedbackService = new FeedbackService($events, $registrations, $comments, $ratings);
 
 $request = Request::fromGlobals();
 
@@ -133,5 +135,6 @@ return [
     'registrations' => $registrations,
     'eventService' => $eventService,
     'registrationService' => $registrationService,
+    'feedbackService' => $feedbackService,
     'request' => $request,
 ];

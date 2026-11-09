@@ -62,7 +62,7 @@ final class RegistrationController
                     : 'Registrace byla vytvořena. Čeká na úhradu.'
             );
         } catch (ValidationException $exception) {
-            Flash::set('danger', reset($exception->errors()) ?: 'Registraci se nepodařilo vytvořit.');
+            Flash::set('danger', (array_values($exception->errors())[0] ?? null) ?: 'Registraci se nepodařilo vytvořit.');
         } catch (BusinessRuleException $exception) {
             Flash::set('danger', $exception->getMessage());
         }

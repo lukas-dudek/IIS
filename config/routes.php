@@ -6,10 +6,12 @@ use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
 use App\Controllers\CalendarController;
 use App\Controllers\CategoryController;
+use App\Controllers\CommentController;
 use App\Controllers\EventController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
+use App\Controllers\RatingController;
 use App\Controllers\RegistrationController;
 use App\Controllers\VenueController;
 
@@ -447,6 +449,55 @@ return [
         'controller' => RegistrationController::class,
         'action' => 'rejectPayment',
         'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/udalosti/{slug}/komentar',
+        'controller' => CommentController::class,
+        'action' => 'store',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/komentar/{id}/upravit',
+        'controller' => CommentController::class,
+        'action' => 'update',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/komentar/{id}/smazat',
+        'controller' => CommentController::class,
+        'action' => 'destroy',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/udalosti/{slug}/hodnoceni',
+        'controller' => RatingController::class,
+        'action' => 'store',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moderace/komentare',
+        'controller' => ModerationController::class,
+        'action' => 'comments',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/komentare/{id}/skryt',
+        'controller' => ModerationController::class,
+        'action' => 'hideComment',
+        'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/moderace/komentare/{id}/zobrazit',
+        'controller' => ModerationController::class,
+        'action' => 'showComment',
+        'middleware' => ['auth', 'role:moderator'],
     ],
     [
         'method' => 'POST',

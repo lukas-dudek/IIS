@@ -123,6 +123,15 @@ final class EventController
             abort(404);
         }
 
+        $userId = $this->auth->id();
+        $registration = $userId !== null
+            ? $this->registrations->findForEventUser((int) $event['id'], $userId)
+            : null;
+        $canFeedback = $registration !== null
+            && $registration['status'] === 'confirmed'
+            && $event['status'] === 'approved'
+            && is_past((string) $event['ends_at']);
+
         return Response::html($this->view->render('events/show', [
             'title' => $event['title'],
             'event' => $event,
@@ -130,8 +139,13 @@ final class EventController
             'rating' => $this->ratings->summaryForEvent((int) $event['id']),
             'comments' => $this->comments->visibleForEvent((int) $event['id']),
             'commentsOpen' => is_past($event['ends_at']),
-            'registration' => $this->auth->check()
-                ? $this->registrations->findForEventUser((int) $event['id'], (int) $this->auth->id())
+            'registration' => $registration,
+            'canFeedback' => $canFeedback,
+            'userComment' => $userId !== null
+                ? $this->comments->findForEventUser((int) $event['id'], $userId)
+                : null,
+            'userRating' => $userId !== null
+                ? $this->ratings->findForEventUser((int) $event['id'], $userId)
                 : null,
         ]));
     }
