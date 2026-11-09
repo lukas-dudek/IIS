@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
+use App\Controllers\CalendarController;
 use App\Controllers\CategoryController;
 use App\Controllers\EventController;
 use App\Controllers\HomeController;
@@ -389,6 +390,20 @@ return [
         'pattern' => '/moje-registrace',
         'controller' => RegistrationController::class,
         'action' => 'index',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/muj-kalendar',
+        'controller' => CalendarController::class,
+        'action' => 'index',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/muj-kalendar.ics',
+        'controller' => CalendarController::class,
+        'action' => 'export',
         'middleware' => ['auth'],
     ],
     [

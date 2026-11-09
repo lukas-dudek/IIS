@@ -32,3 +32,15 @@ body {
 .venue-preview {
     max-height: 160px;
 }
+
+.calendar-table td {
+    min-width: 110px;
+    height: 110px;
+    vertical-align: top;
+}
+
+.calendar-event {
+    font-size: 0.75rem;
+    line-height: 1.25;
+    margin-bottom: 0.25rem;
+}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
+use App\Controllers\CalendarController;
 use App\Controllers\CategoryController;
 use App\Controllers\EventController;
 use App\Controllers\HomeController;
@@ -55,6 +56,12 @@ $controllerFactory = static function (string $controller) use ($app): object {
             $app['events'],
             $app['registrations'],
             $app['registrationService']
+        ),
+        CalendarController::class => new CalendarController(
+            $app['view'],
+            $app['auth'],
+            $app['events'],
+            $app['config']
         ),
         default => throw new RuntimeException('Neznámý controller: ' . $controller),
     };

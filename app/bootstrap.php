@@ -49,6 +49,7 @@ require APP_ROOT . '/app/Support/slug.php';
 require APP_ROOT . '/app/Support/venue_form.php';
 require APP_ROOT . '/app/Support/category_form.php';
 require APP_ROOT . '/app/Support/event_form.php';
+require APP_ROOT . '/app/Support/ics.php';
 
 $configFile = APP_ROOT . '/config/config.php';
 if (!is_file($configFile)) {

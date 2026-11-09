@@ -111,6 +111,46 @@ final class EventRepository
         return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
     }
 
+    public function calendarForUser(int $userId, string $fromUtc, string $toUtc): array
+    {
+        return $this->userCalendar($userId, $fromUtc, $toUtc, false);
+    }
+
+    public function exportForUser(int $userId): array
+    {
+        return $this->userCalendar($userId, null, null, true);
+    }
+
+    private function userCalendar(int $userId, ?string $fromUtc, ?string $toUtc, bool $activeOnly): array
+    {
+        $sql = "SELECT e.*, v.name AS venue_name, v.city AS venue_city,
+                       v.street AS venue_street, v.postal_code AS venue_postal_code,
+                       c.name AS category_name, r.status AS registration_status
+                FROM events e
+                JOIN venues v ON v.id = e.venue_id
+                JOIN categories c ON c.id = e.category_id
+                LEFT JOIN registrations r
+                    ON r.event_id = e.id AND r.user_id = ? AND r.status = 'confirmed'
+                WHERE e.status = 'approved' AND (e.manager_id = ? OR r.id IS NOT NULL)";
+        $params = [$userId, $userId];
+
+        if ($fromUtc !== null && $toUtc !== null) {
+            $sql .= ' AND e.starts_at >= ? AND e.starts_at <= ?';
+            $params[] = $fromUtc;
+            $params[] = $toUtc;
+        }
+        if ($activeOnly) {
+            $sql .= ' AND e.ends_at >= ?';
+            $params[] = now_utc();
+        }
+
+        $sql .= ' ORDER BY e.starts_at ASC';
+        $statement = $this->database->pdo()->prepare($sql);
+        $statement->execute($params);
+
+        return $statement->fetchAll();
+    }
+
     public function mine(int $managerId): array
     {
         $statement = $this->database->pdo()->prepare(

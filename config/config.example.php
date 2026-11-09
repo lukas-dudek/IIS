@@ -9,6 +9,7 @@ return [
         'url' => 'http://127.0.0.1:8000',
         'base_path' => '',
         'timezone' => 'Europe/Prague',
+        'ics_host' => 'iis.local',
         'debug' => true,
     ],
     'db' => [
