@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="720" viewBox="0 0 900 720" role="img">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+  </marker>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; fill: #0f172a; }
+    .title { font-size: 20px; font-weight: 700; }
+    .box { fill: #f8fafc; stroke: #334155; stroke-width: 1.5; rx: 8; }
+    .accent { fill: #e0f2fe; stroke: #0369a1; stroke-width: 1.5; rx: 8; }
+    .label { font-size: 13px; }
+    .small { font-size: 11px; fill: #475569; }
+    .edge { stroke: #475569; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .plain { stroke: #94a3b8; stroke-width: 1.2; fill: none; stroke-dasharray: 5 4; }
+  </style>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+
+<text x="30" y="35" class="title">Architektura aplikace a tok požadavku</text>
+<text x="30" y="56" class="small">Front controller, router, middleware, tenké controllery a service/repository vrstvy. PHP 8.1, PDO, MariaDB.</text>
+
+<rect x="30" y="90" width="150" height="70" class="box"/>
+<text x="105" y="120" text-anchor="middle" class="label" font-weight="700">Prohlížeč</text>
+<text x="105" y="140" text-anchor="middle" class="small">HTML, Bootstrap 5.3.3</text>
+
+<rect x="230" y="90" width="170" height="70" class="box"/>
+<text x="315" y="118" text-anchor="middle" class="label" font-weight="700">Apache + .htaccess</text>
+<text x="315" y="138" text-anchor="middle" class="small">rewrite, UTF-8, headers</text>
+
+<rect x="450" y="90" width="180" height="70" class="accent"/>
+<text x="540" y="118" text-anchor="middle" class="label" font-weight="700">public/index.php</text>
+<text x="540" y="138" text-anchor="middle" class="small">front controller</text>
+
+<rect x="680" y="90" width="150" height="70" class="box"/>
+<text x="755" y="118" text-anchor="middle" class="label" font-weight="700">Router</text>
+<text x="755" y="138" text-anchor="middle" class="small">metoda + maska cesty</text>
+
+<rect x="680" y="210" width="150" height="70" class="box"/>
+<text x="755" y="238" text-anchor="middle" class="label" font-weight="700">Middleware</text>
+<text x="755" y="258" text-anchor="middle" class="small">auth, role, CSRF</text>
+
+<rect x="450" y="210" width="180" height="70" class="box"/>
+<text x="540" y="238" text-anchor="middle" class="label" font-weight="700">Controller</text>
+<text x="540" y="258" text-anchor="middle" class="small">validace vstupu, odpověď</text>
+
+<rect x="230" y="330" width="170" height="70" class="box"/>
+<text x="315" y="358" text-anchor="middle" class="label" font-weight="700">Service</text>
+<text x="315" y="378" text-anchor="middle" class="small">business pravidla, transakce</text>
+
+<rect x="230" y="450" width="170" height="70" class="box"/>
+<text x="315" y="478" text-anchor="middle" class="label" font-weight="700">Repository</text>
+<text x="315" y="498" text-anchor="middle" class="small">prepared SQL, mapování</text>
+
+<rect x="230" y="570" width="170" height="70" class="box"/>
+<text x="315" y="598" text-anchor="middle" class="label" font-weight="700">MariaDB / InnoDB</text>
+<text x="315" y="618" text-anchor="middle" class="small">UTF-8, cizí klíče, UTC</text>
+
+<rect x="450" y="330" width="180" height="70" class="box"/>
+<text x="540" y="358" text-anchor="middle" class="label" font-weight="700">View + layout</text>
+<text x="540" y="378" text-anchor="middle" class="small">PHP šablony, helper e()</text>
+
+<rect x="680" y="330" width="170" height="70" class="box"/>
+<text x="765" y="358" text-anchor="middle" class="label" font-weight="700">Session + CSRF</text>
+<text x="765" y="378" text-anchor="middle" class="small">cookie HttpOnly, SameSite=Lax</text>
+
+<rect x="450" y="450" width="180" height="70" class="box"/>
+<text x="540" y="478" text-anchor="middle" class="label" font-weight="700">Upload</text>
+<text x="540" y="498" text-anchor="middle" class="small">finfo + getimagesize</text>
+
+<rect x="680" y="450" width="170" height="70" class="box"/>
+<text x="765" y="478" text-anchor="middle" class="label" font-weight="700">storage/</text>
+<text x="765" y="498" text-anchor="middle" class="small">logy, dočasné soubory</text>
+
+<path d="M 180 125 L 225 125" class="edge"/>
+<path d="M 400 125 L 445 125" class="edge"/>
+<path d="M 630 125 L 675 125" class="edge"/>
+<path d="M 755 160 L 755 205" class="edge"/>
+<path d="M 680 245 L 635 245" class="edge"/>
+<path d="M 540 280 L 540 325" class="edge"/>
+<path d="M 450 245 L 405 340" class="edge"/>
+<path d="M 315 400 L 315 445" class="edge"/>
+<path d="M 315 520 L 315 565" class="edge"/>
+<path d="M 630 365 L 675 365" class="edge"/>
+<path d="M 540 400 L 540 445" class="edge"/>
+<path d="M 630 485 L 675 485" class="edge"/>
+
+<text x="202" y="115" text-anchor="middle" class="small">HTTPS</text>
+<text x="422" y="115" text-anchor="middle" class="small">rewrite</text>
+<text x="652" y="115" text-anchor="middle" class="small">dispatch</text>
+<text x="770" y="182" class="small">ověří relaci</text>
+<text x="657" y="235" class="small">akce</text>
+<text x="480" y="305" class="small">data</text>
+<text x="330" y="425" class="small">pravidla</text>
+<text x="330" y="545" class="small">SQL</text>
+<text x="650" y="355" class="small">render</text>
+<text x="560" y="430" class="small">soubor</text>
+
+<text x="30" y="700" class="small">Poznámka: controller neobsahuje SQL ani rozhodnutí o stavu; service drží transakci a repository pouze dotazy.</text>
+
+</svg>
