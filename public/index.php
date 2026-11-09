@@ -76,4 +76,4 @@ try {
     $response = $renderError(500, 'Chyba serveru');
 }
 
-$response->send();
+$response->send($app['request']->method() !== 'HEAD');

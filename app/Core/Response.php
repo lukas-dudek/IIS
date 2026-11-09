@@ -48,15 +48,24 @@ final class Response
         return $this->headers;
     }
 
-    public function send(): void
+    public function send(bool $sendBody = true): void
     {
         if (!headers_sent()) {
             http_response_code($this->status);
-            foreach ($this->headers as $name => $value) {
+            $headers = array_merge([
+                'X-Content-Type-Options' => 'nosniff',
+                'X-Frame-Options' => 'SAMEORIGIN',
+                'Referrer-Policy' => 'strict-origin-when-cross-origin',
+                'Content-Security-Policy' => "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'",
+            ], $this->headers);
+
+            foreach ($headers as $name => $value) {
                 header($name . ': ' . $value);
             }
         }
 
-        echo $this->body;
+        if ($sendBody) {
+            echo $this->body;
+        }
     }
 }
