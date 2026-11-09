@@ -104,6 +104,23 @@ final class VenueServiceTest extends TestCase
         self::assertFalse($this->service->delete(1));
     }
 
+    public function testRejectedProposalReturnsToPendingAfterUpdate(): void
+    {
+        $id = $this->service->propose($this->venueData('test_venue_service_resubmit'), null, 3);
+        $this->service->reject($id, 2, 'Chybí údaje.');
+
+        $rejected = $this->venues->find($id);
+        self::assertSame('rejected', $rejected['status']);
+        self::assertSame('Chybí údaje.', $rejected['rejection_reason']);
+
+        $this->service->updateProposal($id, 3, $this->venueData('test_venue_service_resubmit'), null);
+
+        $pending = $this->venues->find($id);
+        self::assertSame('pending', $pending['status']);
+        self::assertNull($pending['rejection_reason']);
+        self::assertNull($pending['reviewed_by']);
+    }
+
     private function venueData(string $name): array
     {
         return [
