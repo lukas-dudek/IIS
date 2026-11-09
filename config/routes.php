@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
 use App\Controllers\CategoryController;
+use App\Controllers\EventController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
@@ -339,5 +340,54 @@ return [
         'controller' => ModerationController::class,
         'action' => 'deleteCategory',
         'middleware' => ['auth', 'role:moderator'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/moje-udalosti',
+        'controller' => EventController::class,
+        'action' => 'mine',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/udalosti/nova',
+        'controller' => EventController::class,
+        'action' => 'create',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/udalosti',
+        'controller' => EventController::class,
+        'action' => 'store',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'GET',
+        'pattern' => '/udalosti/{id}/upravit',
+        'controller' => EventController::class,
+        'action' => 'edit',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/udalosti/{id}',
+        'controller' => EventController::class,
+        'action' => 'update',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/udalosti/{id}/odeslat',
+        'controller' => EventController::class,
+        'action' => 'submit',
+        'middleware' => ['auth'],
+    ],
+    [
+        'method' => 'POST',
+        'pattern' => '/udalosti/{id}/zrusit',
+        'controller' => EventController::class,
+        'action' => 'cancel',
+        'middleware' => ['auth'],
     ],
 ];

@@ -12,10 +12,13 @@ use App\Core\Upload;
 use App\Core\View;
 use App\Core\Authorization;
 use App\Repositories\CategoryRepository;
+use App\Repositories\EventRepository;
+use App\Repositories\TicketTypeRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\VenueRepository;
 use App\Services\AuthService;
 use App\Services\CategoryService;
+use App\Services\EventService;
 use App\Services\UserService;
 use App\Services\VenueService;
 
@@ -41,6 +44,7 @@ require APP_ROOT . '/app/Support/dates.php';
 require APP_ROOT . '/app/Support/slug.php';
 require APP_ROOT . '/app/Support/venue_form.php';
 require APP_ROOT . '/app/Support/category_form.php';
+require APP_ROOT . '/app/Support/event_form.php';
 
 $configFile = APP_ROOT . '/config/config.php';
 if (!is_file($configFile)) {
@@ -88,6 +92,9 @@ $venues = new VenueRepository($database);
 $venueService = new VenueService($venues, $upload);
 $categories = new CategoryRepository($database);
 $categoryService = new CategoryService($categories);
+$events = new EventRepository($database);
+$ticketTypes = new TicketTypeRepository($database);
+$eventService = new EventService($events, $ticketTypes, $venues, $categories, $database);
 
 $request = Request::fromGlobals();
 
@@ -110,5 +117,8 @@ return [
     'venueService' => $venueService,
     'categories' => $categories,
     'categoryService' => $categoryService,
+    'events' => $events,
+    'ticketTypes' => $ticketTypes,
+    'eventService' => $eventService,
     'request' => $request,
 ];

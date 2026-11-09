@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controllers\AdminUserController;
 use App\Controllers\AuthController;
 use App\Controllers\CategoryController;
+use App\Controllers\EventController;
 use App\Controllers\HomeController;
 use App\Controllers\ModerationController;
 use App\Controllers\ProfileController;
@@ -35,6 +36,15 @@ $controllerFactory = static function (string $controller) use ($app): object {
         VenueController::class => new VenueController($app['view'], $app['auth'], $app['venues'], $app['venueService']),
         ModerationController::class => new ModerationController($app['view'], $app['auth'], $app['venues'], $app['venueService'], $app['categoryService']),
         CategoryController::class => new CategoryController($app['view'], $app['auth'], $app['categoryService']),
+        EventController::class => new EventController(
+            $app['view'],
+            $app['auth'],
+            $app['events'],
+            $app['ticketTypes'],
+            $app['eventService'],
+            $app['venues'],
+            $app['categoryService']
+        ),
         default => throw new RuntimeException('Neznámý controller: ' . $controller),
     };
 };

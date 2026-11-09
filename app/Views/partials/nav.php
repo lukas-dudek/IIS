@@ -12,6 +12,7 @@ $isAdminUsers = str_starts_with($current . '/', rtrim(url('/admin/uzivatele'), '
 $isVenues = $current === rtrim(url('/mista'), '/')
     || str_starts_with($current . '/', rtrim(url('/mista'), '/') . '/');
 $isProposals = $current === rtrim(url('/moje-navrhy'), '/');
+$isMyEvents = $current === rtrim(url('/moje-udalosti'), '/');
 $isModeration = str_starts_with($current . '/', rtrim(url('/moderace'), '/') . '/');
 $isModerator = $user !== null && in_array($user['role'], ['moderator', 'admin'], true);
 $isAdmin = $user !== null && $user['role'] === 'admin';
@@ -61,6 +62,10 @@ $isAdmin = $user !== null && $user['role'] === 'admin';
                 </ul>
             <?php else: ?>
                 <ul class="navbar-nav align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link<?= $isMyEvents ? ' active' : '' ?>" href="<?= e(url('/moje-udalosti')) ?>"
+                           <?= $isMyEvents ? 'aria-current="page"' : '' ?>>Moje události</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link<?= $isProposals ? ' active' : '' ?>" href="<?= e(url('/moje-navrhy')) ?>"
                            <?= $isProposals ? 'aria-current="page"' : '' ?>>Moje návrhy</a>

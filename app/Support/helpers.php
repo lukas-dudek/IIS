@@ -76,6 +76,18 @@ function moderation_status_label(string $status): string
     };
 }
 
+function event_status_label(string $status): string
+{
+    return match ($status) {
+        'draft' => 'Koncept',
+        'pending' => 'Čeká na schválení',
+        'approved' => 'Schváleno',
+        'rejected' => 'Zamítnuto',
+        'cancelled' => 'Zrušeno',
+        default => $status,
+    };
+}
+
 function abort(int $status, string $message = ''): never
 {
     throw new HttpException($status, $message);

@@ -62,6 +62,28 @@ function now_utc(): string
     return (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
 }
 
+function prague_input_value(?string $utc): string
+{
+    if ($utc === null || $utc === '') {
+        return '';
+    }
+
+    $date = utc_to_prague($utc);
+
+    return $date === null ? '' : $date->format('Y-m-d\TH:i');
+}
+
+function default_event_times(): array
+{
+    $now = new DateTimeImmutable('now', new DateTimeZone('Europe/Prague'));
+    $start = $now->setTime((int) $now->format('G'), 0)->modify('+1 hour');
+
+    return [
+        'starts_at' => $start->format('Y-m-d\TH:i'),
+        'ends_at' => $start->modify('+2 hours')->format('Y-m-d\TH:i'),
+    ];
+}
+
 function is_past(?string $utc): bool
 {
     if ($utc === null || $utc === '') {
