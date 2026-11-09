@@ -53,6 +53,33 @@ final class Request
         return $this->post[$key] ?? $default;
     }
 
+    public function postString(string $key, string $default = ''): string
+    {
+        $value = $this->post[$key] ?? null;
+
+        return is_string($value) ? $value : $default;
+    }
+
+    public function postInt(string $key, int $default = 0): int
+    {
+        $value = $this->post[$key] ?? null;
+        if (is_int($value)) {
+            return $value;
+        }
+        if (is_string($value) && preg_match('/^\d+$/', $value) === 1) {
+            return (int) $value;
+        }
+
+        return $default;
+    }
+
+    public function queryString(string $key, string $default = ''): string
+    {
+        $value = $this->query[$key] ?? null;
+
+        return is_string($value) ? $value : $default;
+    }
+
     public function input(string $key, mixed $default = null): mixed
     {
         return $this->post[$key] ?? $this->query[$key] ?? $default;

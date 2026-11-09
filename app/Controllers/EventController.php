@@ -238,7 +238,7 @@ final class EventController
         }
         $event = $this->findForManager($id);
 
-        $reason = trim((string) $request->post('reason', ''));
+        $reason = trim($request->postString('reason'));
         $validator = new Validator(['reason' => $reason], ['reason' => 'Důvod zrušení']);
         $validator->required('reason')->length('reason', 3, 255);
         if ($validator->fails()) {
@@ -264,7 +264,7 @@ final class EventController
             $event = $this->findForManager($id);
         }
 
-        $submit ??= $request->post('action') === 'submit';
+        $submit ??= $request->postString('action') === 'submit';
         $data = event_form_data($request);
         $ticketRows = event_ticket_rows($request);
 

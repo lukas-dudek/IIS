@@ -75,9 +75,12 @@ ini_set('display_errors', $debug ? '1' : '0');
 ini_set('log_errors', '1');
 ini_set('error_log', $logDir . '/php-' . gmdate('Y-m-d') . '.log');
 
+$isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+$secureCookies = (bool) $config->get('session.secure', false) || $isHttps;
+
 Session::start(
     (int) $config->get('session.timeout', 1800),
-    (bool) $config->get('session.secure', false),
+    $secureCookies,
     (string) $config->get('session.name', 'iis_session'),
     BASE_PATH === '' ? '/' : BASE_PATH
 );

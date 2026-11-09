@@ -2,6 +2,11 @@ Options -Indexes
 DirectoryIndex index.php
 AddDefaultCharset UTF-8
 
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f

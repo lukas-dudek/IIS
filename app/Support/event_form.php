@@ -8,14 +8,14 @@ use App\Core\Validator;
 function event_form_data(Request $request): array
 {
     return [
-        'title' => trim((string) $request->post('title', '')),
-        'description' => trim((string) $request->post('description', '')),
-        'starts_at' => trim((string) $request->post('starts_at', '')),
-        'ends_at' => trim((string) $request->post('ends_at', '')),
-        'venue_id' => trim((string) $request->post('venue_id', '')),
-        'category_id' => trim((string) $request->post('category_id', '')),
-        'capacity' => trim((string) $request->post('capacity', '')),
-        'payment_note' => trim((string) $request->post('payment_note', '')),
+        'title' => trim($request->postString('title')),
+        'description' => trim($request->postString('description')),
+        'starts_at' => trim($request->postString('starts_at')),
+        'ends_at' => trim($request->postString('ends_at')),
+        'venue_id' => trim($request->postString('venue_id')),
+        'category_id' => trim($request->postString('category_id')),
+        'capacity' => trim($request->postString('capacity')),
+        'payment_note' => trim($request->postString('payment_note')),
     ];
 }
 
@@ -37,14 +37,26 @@ function event_ticket_rows(Request $request): array
         is_array($capacities) ? count($capacities) : 0
     );
 
+    $scalar = static function (array $values, int $index): string {
+        $value = $values[$index] ?? '';
+        if (is_string($value)) {
+            return trim($value);
+        }
+        if (is_int($value)) {
+            return (string) $value;
+        }
+
+        return '';
+    };
+
     $rows = [];
     for ($index = 0; $index < $count; $index++) {
-        $idRaw = trim((string) (is_array($ids) ? ($ids[$index] ?? '') : ''));
-        $capacityRaw = trim((string) (is_array($capacities) ? ($capacities[$index] ?? '') : ''));
+        $idRaw = $scalar(is_array($ids) ? $ids : [], $index);
+        $capacityRaw = $scalar(is_array($capacities) ? $capacities : [], $index);
         $rows[] = [
             'id' => $idRaw === '' ? null : (int) $idRaw,
-            'name' => trim((string) (is_array($names) ? ($names[$index] ?? '') : '')),
-            'price' => trim((string) (is_array($prices) ? ($prices[$index] ?? '') : '')),
+            'name' => $scalar(is_array($names) ? $names : [], $index),
+            'price' => $scalar(is_array($prices) ? $prices : [], $index),
             'capacity' => $capacityRaw === '' ? null : (int) $capacityRaw,
         ];
     }

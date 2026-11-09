@@ -7,12 +7,12 @@ use App\Core\Validator;
 
 function category_form_data(Request $request): array
 {
-    $parentRaw = trim((string) $request->post('parent_id', ''));
+    $parentRaw = trim($request->postString('parent_id'));
 
     return [
-        'name' => trim((string) $request->post('name', '')),
+        'name' => trim($request->postString('name')),
         'parent_id' => $parentRaw === '' ? null : (int) $parentRaw,
-        'description' => trim((string) $request->post('description', '')),
+        'description' => trim($request->postString('description')),
     ];
 }
 

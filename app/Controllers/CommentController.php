@@ -36,7 +36,7 @@ final class CommentController
             $this->feedbackService->saveComment(
                 (int) $event['id'],
                 (int) $this->auth->id(),
-                (string) $request->post('body', '')
+                $request->postString('body')
             );
             Flash::set('success', 'Komentář byl uložen.');
         } catch (ValidationException $exception) {
@@ -63,7 +63,7 @@ final class CommentController
             $comment = $this->feedbackService->updateComment(
                 $id,
                 (int) $this->auth->id(),
-                (string) $request->post('body', '')
+                $request->postString('body')
             );
             Flash::set('success', 'Komentář byl upraven.');
         } catch (ValidationException $exception) {

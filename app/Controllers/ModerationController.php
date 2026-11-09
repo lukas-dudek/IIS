@@ -154,7 +154,7 @@ final class ModerationController
             abort(404);
         }
 
-        $reason = trim((string) $request->post('reason', ''));
+        $reason = trim($request->postString('reason'));
         $validator = new Validator(['reason' => $reason], ['reason' => 'Důvod zamítnutí']);
         $validator->required('reason')->length('reason', 3, 255);
         if ($validator->fails()) {
@@ -305,7 +305,7 @@ final class ModerationController
             abort(404);
         }
 
-        $reason = trim((string) $request->post('reason', ''));
+        $reason = trim($request->postString('reason'));
         $validator = new Validator(['reason' => $reason], ['reason' => 'Důvod zamítnutí']);
         $validator->required('reason')->length('reason', 3, 255);
         if ($validator->fails()) {
@@ -406,7 +406,7 @@ final class ModerationController
             $this->feedbackService->hideComment(
                 $id,
                 (int) $this->auth->id(),
-                (string) $request->post('reason', '')
+                $request->postString('reason')
             );
             Flash::set('success', 'Komentář byl skryt.');
         } catch (ValidationException $exception) {
@@ -515,7 +515,7 @@ final class ModerationController
         if ($event === null) {
             abort(404);
         }
-        $reason = trim((string) $request->post('reason', ''));
+        $reason = trim($request->postString('reason'));
         $validator = new Validator(['reason' => $reason], ['reason' => 'Důvod zamítnutí']);
         $validator->required('reason')->length('reason', 3, 255);
         if ($validator->fails()) {

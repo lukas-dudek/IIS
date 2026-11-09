@@ -34,7 +34,7 @@ final class RatingController
             $this->feedbackService->saveRating(
                 (int) $event['id'],
                 (int) $this->auth->id(),
-                (int) $request->post('value', 0)
+                $request->postInt('value')
             );
             Flash::set('success', 'Hodnocení bylo uloženo.');
         } catch (ValidationException $exception) {

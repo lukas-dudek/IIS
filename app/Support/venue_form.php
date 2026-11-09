@@ -8,11 +8,11 @@ use App\Core\Validator;
 function venue_form_data(Request $request): array
 {
     return [
-        'name' => trim((string) $request->post('name', '')),
-        'street' => trim((string) $request->post('street', '')),
-        'city' => trim((string) $request->post('city', '')),
-        'postal_code' => trim((string) $request->post('postal_code', '')),
-        'description' => trim((string) $request->post('description', '')),
+        'name' => trim($request->postString('name')),
+        'street' => trim($request->postString('street')),
+        'city' => trim($request->postString('city')),
+        'postal_code' => trim($request->postString('postal_code')),
+        'description' => trim($request->postString('description')),
     ];
 }
 

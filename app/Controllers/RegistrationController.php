@@ -42,7 +42,7 @@ final class RegistrationController
             abort(404);
         }
 
-        $ticketTypeId = (int) $request->post('ticket_type_id', 0);
+        $ticketTypeId = $request->postInt('ticket_type_id');
         if ($ticketTypeId <= 0) {
             Flash::set('danger', 'Vyberte typ vstupenky.');
 

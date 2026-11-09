@@ -26,10 +26,10 @@ final class AdminUserController
 
     public function index(Request $request, array $params): Response
     {
-        $query = trim((string) $request->query('q', ''));
-        $roleParam = (string) $request->query('role', '');
+        $query = trim($request->queryString('q'));
+        $roleParam = $request->queryString('role');
         $role = in_array($roleParam, ['admin', 'moderator', 'user'], true) ? $roleParam : '';
-        $activeParam = (string) $request->query('active', '');
+        $activeParam = $request->queryString('active');
         $active = match ($activeParam) {
             '1' => true,
             '0' => false,
@@ -54,12 +54,12 @@ final class AdminUserController
         }
 
         $data = [
-            'username' => trim((string) $request->post('username', '')),
-            'email' => mb_strtolower(trim((string) $request->post('email', ''))),
-            'name' => trim((string) $request->post('name', '')),
-            'role' => (string) $request->post('role', 'user'),
-            'password' => (string) $request->post('password', ''),
-            'password_confirm' => (string) $request->post('password_confirm', ''),
+            'username' => trim($request->postString('username')),
+            'email' => mb_strtolower(trim($request->postString('email'))),
+            'name' => trim($request->postString('name')),
+            'role' => $request->postString('role', 'user'),
+            'password' => $request->postString('password'),
+            'password_confirm' => $request->postString('password_confirm'),
         ];
 
         $validator = new Validator($data, [
@@ -123,9 +123,9 @@ final class AdminUserController
         }
 
         $data = [
-            'name' => trim((string) $request->post('name', '')),
-            'email' => mb_strtolower(trim((string) $request->post('email', ''))),
-            'role' => (string) $request->post('role', $user['role']),
+            'name' => trim($request->postString('name')),
+            'email' => mb_strtolower(trim($request->postString('email'))),
+            'role' => $request->postString('role', (string) $user['role']),
         ];
         $validator = new Validator($data, [
             'name' => 'Jméno',
@@ -171,8 +171,8 @@ final class AdminUserController
         }
         $user = $this->userService->get($id);
 
-        $new = (string) $request->post('new_password', '');
-        $confirm = (string) $request->post('new_password_confirm', '');
+        $new = $request->postString('new_password');
+        $confirm = $request->postString('new_password_confirm');
         $validator = new Validator(
             ['new_password' => $new, 'new_password_confirm' => $confirm],
             ['new_password' => 'Nové heslo', 'new_password_confirm' => 'Potvrzení nového hesla']

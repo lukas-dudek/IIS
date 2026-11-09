@@ -44,8 +44,8 @@ final class ProfileController
             abort(403);
         }
 
-        $name = trim((string) $request->post('name', ''));
-        $email = mb_strtolower(trim((string) $request->post('email', '')));
+        $name = trim($request->postString('name'));
+        $email = mb_strtolower(trim($request->postString('email')));
         $validator = new Validator(
             ['name' => $name, 'email' => $email],
             ['name' => 'Jméno', 'email' => 'E-mail']
@@ -93,9 +93,9 @@ final class ProfileController
             abort(403);
         }
 
-        $current = (string) $request->post('current_password', '');
-        $new = (string) $request->post('new_password', '');
-        $confirm = (string) $request->post('new_password_confirm', '');
+        $current = $request->postString('current_password');
+        $new = $request->postString('new_password');
+        $confirm = $request->postString('new_password_confirm');
         $validator = new Validator(
             [
                 'current_password' => $current,

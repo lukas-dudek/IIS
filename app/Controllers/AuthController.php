@@ -38,9 +38,9 @@ final class AuthController
             return Response::redirect(url('/'));
         }
 
-        $username = trim((string) $request->post('username', ''));
-        $password = (string) $request->post('password', '');
-        $return = $this->safeReturn($request->post('return'));
+        $username = trim($request->postString('username'));
+        $password = $request->postString('password');
+        $return = $this->safeReturn($request->postString('return'));
 
         $validator = new Validator(
             ['username' => $username, 'password' => $password],
@@ -82,11 +82,11 @@ final class AuthController
         }
 
         $data = [
-            'username' => trim((string) $request->post('username', '')),
-            'email' => mb_strtolower(trim((string) $request->post('email', ''))),
-            'name' => trim((string) $request->post('name', '')),
-            'password' => (string) $request->post('password', ''),
-            'password_confirm' => (string) $request->post('password_confirm', ''),
+            'username' => trim($request->postString('username')),
+            'email' => mb_strtolower(trim($request->postString('email'))),
+            'name' => trim($request->postString('name')),
+            'password' => $request->postString('password'),
+            'password_confirm' => $request->postString('password_confirm'),
         ];
 
         $validator = new Validator($data, [
