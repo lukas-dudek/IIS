@@ -14,17 +14,23 @@ Informační systém pro správu akcí: uživatelé zakládají události, navrh
 
 ## Stav projektu
 
-Aktuální stav k 1. 11. 2026: analýza, plán a repozitářová struktura jsou hotové. Implementace začíná milníkem M0; repozitář zatím záměrně neobsahuje spustitelnou aplikaci.
+Aktuální stav k 9. 11. 2026: lokální implementace P0 je hotová; P1
+(moderační fronty, varování na kolizi, ICS, bezpečnostní hardening) je hotová.
+Nasazení na Evu a nahrání videa zbývají.
 
 | Oblast | Stav |
 |---|---|
 | analýza, role, datový model, plán | hotovo |
 | pravidla pro vývoj a AI | hotovo |
-| struktura repozitáře | hotovo |
-| databázové schéma a seed | M0, návrh |
-| skeleton aplikace a deploy na Evu | M0 |
-| funkce P0 | M1–M2 |
-| testy, dokumentace, video, odevzdání | M3–M4 |
+| jádro, routy, UI | hotovo lokálně |
+| databáze a ukázková data | hotovo |
+| P0 funkce | hotovo lokálně |
+| P1 (moderace, kolize, ICS, hardening) | hotovo lokálně |
+| P2 | záměrně nedělané |
+| testy | 77 testů, 279 asercí |
+| dokumentace | `docs/doc.html`, `docs/obhajoba.md`, diagramy |
+| nasazení na Evu | v přípravě |
+| video | scénář hotový, nahrání zbývá |
 
 ## Tým
 
@@ -73,7 +79,7 @@ Runtime aplikace nemá Composer závislosti. Bootstrap je jediná třetí knihov
 │   ├── pull_request_template.md
 │   └── ISSUE_TEMPLATE/
 ├── app/
-│   ├── bootstrap.php          (M0)
+│   ├── bootstrap.php
 │   ├── Core/                  router, request, response, DB, session, auth, CSRF, validace
 │   ├── Controllers/           tenké controllery
 │   ├── Repositories/          explicitní SQL a mapování
@@ -83,21 +89,21 @@ Runtime aplikace nemá Composer závislosti. Bootstrap je jediná třetí knihov
 │       ├── layouts/           společný layout
 │       ├── partials/          navigace, formulářové prvky, flash
 │       └── errors/            403, 404, 500
-├── bin/                       deploy a kontrolní skripty (M0)
+├── bin/                       check.sh (php -l, zakázané vzory, PHPUnit)
 ├── config/
-│   ├── config.example.php     (M0)
-│   └── routes.php             (M0)
+│   ├── config.example.php
+│   └── routes.php
 ├── database/
-│   ├── schema.sql             (M0)
-│   └── seed.sql               (M0)
+│   ├── schema.sql
+│   └── seed.sql
 ├── docs/
 │   ├── diagrams/              ER, use case, architektura
-│   ├── doc.html               dokumentace k odevzdání (M3)
+│   ├── doc.html               dokumentace k odevzdání
 │   └── obhajoba.md            vysvětlení klíčových částí (průběžně)
 ├── public/                    document root
-│   ├── index.php              (M0)
-│   ├── router.php             (M0, jen lokální server)
-│   ├── .htaccess              (M0)
+│   ├── index.php              front controller
+│   ├── router.php             jen lokální server
+│   ├── .htaccess              rewrite, UTF-8, hlavičky
 │   ├── assets/
 │   │   ├── css/
 │   │   ├── js/
@@ -107,19 +113,41 @@ Runtime aplikace nemá Composer závislosti. Bootstrap je jediná třetí knihov
 │   ├── logs/
 │   └── tmp/
 ├── tests/
-│   ├── bootstrap.php          (M1)
-│   └── Unit/
+│   ├── bootstrap.php
+│   ├── Unit/
+│   └── Integration/
 └── vendor/                    Composer, pouze lokálně, necommitovat
 ```
 
-Prázdné složky drží `.gitkeep`, aby byla struktura vidět ještě před první implementací. Soubory označené `(M0)`, `(M1)` nebo `(M3)` vzniknou v daném milníku; zbytek se doplňuje podle potřeby. Nic z toho není hotová funkce.
+Struktura odpovídá aktuální implementaci; detaily jsou v `docs/doc.html`.
 
 ## Jak začít
 
-1. Přečti [`implementacni-plan.md`](implementacni-plan.md), hlavně kapitoly 10–13, a [`AGENTS.md`](AGENTS.md).
-2. Vyber issue nebo úkol z milníku M0/M1 a zkontroluj, kdo je vlastník oblasti.
-3. Pracuj v krátké větvi `feat/<issue>-<nazev>` nebo `fix/...`, otevři PR a nech ho reviewovat druhým.
-4. Po M0 bude v README doplněn přesný postup lokálního spuštění; příkazy jsou předepsané v plánu a `AGENTS.md`.
+1. Přečti [`implementacni-plan.md`](implementacni-plan.md) a [`AGENTS.md`](AGENTS.md).
+2. Pracuj v krátké větvi `feat/<issue>-<nazev>` nebo `fix/...`, otevři PR a nech ho reviewovat druhým.
+
+### Lokální spuštění
+
+```bash
+mysql -u root -p -e "CREATE DATABASE iis CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci; CREATE DATABASE iis_test CHARACTER SET utf8mb4 COLLATE utf8mb4_czech_ci;"
+mysql -u root -p iis < database/schema.sql
+mysql -u root -p iis < database/seed.sql
+mysql -u root -p iis_test < database/schema.sql
+mysql -u root -p iis_test < database/seed.sql
+
+cp config/config.example.php config/config.php   # doplnit db.password a app.url
+php -S 127.0.0.1:8000 -t public public/router.php
+```
+
+### Testy a kontrola
+
+```bash
+composer install
+IIS_DB_PASSWORD=*** vendor/bin/phpunit
+PHP_BIN=php ./bin/check.sh
+```
+
+`IIS_DB_PASSWORD` musí odpovídat `db.password` v `config/config.php`.
 
 ## Pravidla spolupráce
 
@@ -146,4 +174,6 @@ Prázdné složky drží `.gitkeep`, aby byla struktura vidět ještě před prv
 
 ## Nejbližší krok
 
-M0: Honzík dodá návrh `database/schema.sql` a seed, Lukáš postaví skeleton a ověří deploy na Evě. Konkrétní úkoly a akceptační kritéria patří do Issues; plán je závazný rozsah.
+- Nasadit aplikaci na Evu a doplnit veřejnou URL do `docs/doc.html`.
+- Nahrát 5minutové video a vložit odkaz do `docs/doc.html`.
+- Provést finální smoke test z čistého prohlížeče a připravit odevzdávací zip bez `.git`, `vendor/`, `config/config.php` a logů.

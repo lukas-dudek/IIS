@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="930" height="420" viewBox="0 0 930 420" role="img">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; fill: #0f172a; }
+    .title { font-size: 20px; font-weight: 700; }
+    .state { fill: #f8fafc; stroke: #334155; stroke-width: 1.5; rx: 22; }
+    .start { fill: #0f172a; }
+    .edge { stroke: #475569; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .label { font-size: 12px; fill: #334155; }
+    .small { font-size: 11px; fill: #64748b; }
+  </style>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="30" y="34" class="title">Stavový automat události</text>
+
+<circle cx="45" cy="180" r="10" class="start"/>
+<path d="M 55 180 L 100 180" class="edge"/>
+<rect x="105" y="145" width="130" height="70" rx="20" class="state"/>
+<text x="170" y="185" text-anchor="middle" font-weight="700">draft</text>
+<rect x="295" y="145" width="140" height="70" rx="20" class="state"/>
+<text x="365" y="185" text-anchor="middle" font-weight="700">pending</text>
+<rect x="500" y="145" width="150" height="70" rx="20" class="state"/>
+<text x="575" y="185" text-anchor="middle" font-weight="700">approved</text>
+<rect x="725" y="45" width="150" height="70" rx="20" class="state"/>
+<text x="800" y="85" text-anchor="middle" font-weight="700">rejected</text>
+<rect x="725" y="275" width="150" height="70" rx="20" class="state"/>
+<text x="800" y="315" text-anchor="middle" font-weight="700">cancelled</text>
+
+<path d="M 235 180 L 290 180" class="edge"/>
+<text x="262" y="168" text-anchor="middle" class="label">odeslat</text>
+<path d="M 435 180 L 495 180" class="edge"/>
+<text x="465" y="168" text-anchor="middle" class="label">schválit</text>
+<path d="M 650 165 C 690 165, 690 85, 720 85" class="edge"/>
+<text x="655" y="125" class="label">zamítnout</text>
+<text x="685" y="136" class="small">s důvodem</text>
+<path d="M 725 100 C 665 125, 430 120, 365 140" class="edge"/>
+<text x="540" y="95" text-anchor="middle" class="label">upravit a znovu odeslat</text>
+<path d="M 575 215 C 575 280, 690 280, 720 290" class="edge"/>
+<text x="645" y="265" class="label">zrušit</text>
+<path d="M 365 215 C 365 300, 690 330, 720 315" class="edge"/>
+<text x="520" y="325" class="label">zrušit s důvodem</text>
+<path d="M 505 150 C 480 105, 430 105, 405 140" class="edge"/>
+<text x="455" y="135" class="label">podstatná změna</text>
+<text x="30" y="380" class="small">Stav finished neexistuje: ukončení se odvozuje z ends_at &lt; now. Přechody provádí EventService v transakci.</text>
+
+</svg>
