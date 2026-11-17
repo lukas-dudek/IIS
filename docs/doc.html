@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IIS – Dokumentace projektu: Správa událostí (Laravel)</title>
+    <style>
+        :root {
+            --ink: #0f172a;
+            --body: #1f2937;
+            --muted: #475569;
+            --line: #dbe2ea;
+            --surface: #f8fafc;
+            --blue: #1d4ed8;
+            --green: #166534;
+            --green-bg: #dcfce7;
+            --amber: #854d0e;
+            --amber-bg: #fef9c3;
+        }
+        * { box-sizing: border-box; }
+        body {
+            max-width: 1120px;
+            margin: 2.5rem auto;
+            padding: 0 1.25rem;
+            font: 16px/1.55 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--body);
+        }
+        h1, h2, h3, h4 { color: var(--ink); line-height: 1.25; }
+        h1 { font-size: 2.2rem; margin-bottom: .25rem; }
+        h2 { font-size: 1.55rem; border-bottom: 2px solid var(--line); padding-bottom: .35rem; margin-top: 2.4rem; }
+        h3 { font-size: 1.2rem; margin-top: 1.8rem; }
+        h4 { font-size: 1.05rem; margin-top: 1.3rem; }
+        a { color: var(--blue); }
+        code, pre { font-family: Menlo, Consolas, "Liberation Mono", monospace; font-size: .92rem; }
+        code { background: var(--surface); border: 1px solid var(--line); padding: .08rem .3rem; border-radius: 5px; }
+        pre { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; overflow: auto; line-height: 1.45; }
+        pre code { background: none; border: 0; padding: 0; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
+        th, td { border: 1px solid var(--line); padding: .55rem; vertical-align: top; }
+        th { background: var(--surface); color: var(--ink); text-align: left; }
+        tr:nth-child(even) td { background: #fcfdfe; }
+        .toc { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.2rem; column-count: 2; column-gap: 2rem; margin: 1.5rem 0 2rem; }
+        .toc a { text-decoration: none; }
+        .toc li { margin: .25rem 0; break-inside: avoid; }
+        .note, .warning { padding: .8rem 1rem; border-radius: 0 10px 10px 0; margin: 1rem 0; }
+        .note { background: #eff6ff; border-left: 4px solid #2563eb; }
+        .warning { background: #fffbeb; border-left: 4px solid #d97706; }
+        .small { color: var(--muted); font-size: .92rem; }
+        hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+        .meta td:first-child { width: 170px; font-weight: 700; color: var(--ink); }
+        @media (max-width: 760px) { .toc { column-count: 1; } }
+    </style>
+</head>
+<body>
+
+<h1>IIS – systém pro správu událostí</h1>
+<p class="small">Implementace v Laravelu 10 (PHP 8.1) · databáze MySQL/MariaDB · dokumentace k odevzdání</p>
+
+<table class="meta">
+    <tr><td>Tým</td><td>Lukáš Dudek, Jan Raska</td></tr>
+    <tr><td>Varianta zadání</td><td>Správa událostí</td></tr>
+    <tr><td>Framework</td><td>Laravel 10.50, PHP 8.1</td></tr>
+    <tr><td>Knihovny</td><td>Laravel 10.50, PHPUnit 10, Bootstrap 5.3.3 (lokálně)</td></tr>
+    <tr><td>Repozitář</td><td>větev <code>laravel</code></td></tr>
+</table>
+
+<div class="toc">
+    <ol>
+        <li><a href="#uvod">Základní údaje a rozsah</a></li>
+        <li><a href="#analyza">Analýza a role</a></li>
+        <li><a href="#model">Datový model</a></li>
+        <li><a href="#architektura">Architektura Laravel aplikace</a></li>
+        <li><a href="#mapovani">Mapování případů použití</a></li>
+        <li><a href="#routy">Routy</a></li>
+        <li><a href="#bezpecnost">Bezpečnost a transakce</a></li>
+        <li><a href="#testovani">Testování</a></li>
+        <li><a href="#nasazeni">Nasazení</a></li>
+        <li><a href="#data">Ukázková data a účty</a></li>
+        <li><a href="#video">Video</a></li>
+        <li><a href="#omezeni">Omezení</a></li>
+    </ol>
+</div>
+
+<h2 id="uvod">1. Základní údaje a rozsah</h2>
+<p>
+    Informační systém eviduje události (koncerty, přednášky, workshopy, setkání), místa konání,
+    hierarchické kategorie, typy vstupenek a registrace účastníků. Uživatelé zakládají události,
+    navrhují nová místa a kategorie, moderátoři je schvalují a moderují komentáře, administrátor
+    spravuje uživatele a role.
+</p>
+<p>Rozsah je dán <code>zadani.md</code> a <code>spec-zadani.md</code>. Původní týmový plán počítal s vlastním
+    malým MVC; tato větev jej nahrazuje Laravel 10 podle doporučení zadání. Rozdíly shrnuje
+    <a href="laravel-migrace.md">docs/laravel-migrace.md</a>.</p>
+
+<h2 id="analyza">2. Analýza a role</h2>
+<table>
+    <tr><th>Role</th><th>Vznik</th><th>Práva</th></tr>
+    <tr>
+        <td>Neregistrovaný uživatel</td>
+        <td>bez přihlášení</td>
+        <td>procházení schválených událostí, filtrů a katalogu míst</td>
+    </tr>
+    <tr>
+        <td>Registrovaný uživatel</td>
+        <td><code>users.role = 'user'</code></td>
+        <td>osobní kalendář, registrace, komentáře a hodnocení po akci, návrhy míst a kategorií, zakládání událostí</td>
+    </tr>
+    <tr>
+        <td>Správce události</td>
+        <td><code>events.manager_id</code></td>
+        <td>úprava a zrušení vlastní události, odeslání ke schválení, potvrzování plateb</td>
+    </tr>
+    <tr>
+        <td>Moderátor</td>
+        <td><code>users.role = 'moderator'</code></td>
+        <td>schvalování událostí, míst a kategorií, správa katalogu, moderace komentářů</td>
+    </tr>
+    <tr>
+        <td>Administrátor</td>
+        <td><code>users.role = 'admin'</code></td>
+        <td>všechna práva moderátora a navíc správa uživatelů a rolí</td>
+    </tr>
+</table>
+
+<h3>Stavové automaty</h3>
+<table>
+    <tr><th>Entita</th><th>Stavy</th><th>Přechody</th></tr>
+    <tr>
+        <td>Událost</td>
+        <td><code>draft</code>, <code>pending</code>, <code>approved</code>, <code>rejected</code>, <code>cancelled</code></td>
+        <td>odeslání <code>draft</code>/<code>rejected</code> → <code>pending</code>; schválení → <code>approved</code>;
+            zamítnutí → <code>rejected</code>; zrušení z <code>draft</code>, <code>pending</code> a <code>approved</code>;
+            podstatná změna <code>approved</code> → <code>pending</code>. „Ukončená“ se odvozuje z <code>ends_at</code>.</td>
+    </tr>
+    <tr>
+        <td>Místo, kategorie</td>
+        <td><code>pending</code>, <code>approved</code>, <code>rejected</code></td>
+        <td>návrh → <code>pending</code>; schválení/zamítnutí moderátorem; úprava zamítnutého návrhu jej vrací do <code>pending</code></td>
+    </tr>
+    <tr>
+        <td>Registrace</td>
+        <td><code>pending</code>, <code>confirmed</code>, <code>cancelled</code></td>
+        <td>zdarma → <code>confirmed</code>; placená → <code>pending</code>, potvrzení platby → <code>confirmed</code>,
+            odmítnutí nebo zrušení → <code>cancelled</code></td>
+    </tr>
+</table>
+
+<h2 id="model">3. Datový model</h2>
+<p>Schéma vytvářejí migrace v <code>database/migrations/</code>. Všechny tabulky jsou InnoDB, <code>utf8mb4</code>,
+    časy v UTC.</p>
+<table>
+    <tr><th>Tabulka</th><th>Migrace</th><th>Model</th><th>Účel</th></tr>
+    <tr><td><code>users</code></td><td>2026_01_01_000100</td><td><code>App\Models\User</code></td><td>účty, role, aktivita, <code>auth_version</code></td></tr>
+    <tr><td><code>venues</code></td><td>2026_01_01_000200</td><td><code>App\Models\Venue</code></td><td>místa konání s adresou a fotografií</td></tr>
+    <tr><td><code>categories</code></td><td>2026_01_01_000300</td><td><code>App\Models\Category</code></td><td>strom kategorií (<code>parent_id</code>, max. hloubka 4)</td></tr>
+    <tr><td><code>events</code></td><td>2026_01_01_000400</td><td><code>App\Models\Event</code></td><td>události včetně kapacity a stavu</td></tr>
+    <tr><td><code>ticket_types</code></td><td>2026_01_01_000500</td><td><code>App\Models\TicketType</code></td><td>typy vstupenek s cenou a kapacitou</td></tr>
+    <tr><td><code>registrations</code></td><td>2026_01_01_000600</td><td><code>App\Models\Registration</code></td><td>registrace se snapshotem ceny a variabilním symbolem</td></tr>
+    <tr><td><code>comments</code></td><td>2026_01_01_000700</td><td><code>App\Models\Comment</code></td><td>jeden komentář na uživatele a událost, stavy <code>visible</code>/<code>hidden</code></td></tr>
+    <tr><td><code>ratings</code></td><td>2026_01_01_000800</td><td><code>App\Models\Rating</code></td><td>jedno hodnocení 1–5 na uživatele a událost</td></tr>
+    <tr><td><code>login_attempts</code></td><td>2026_01_01_000900</td><td><code>App\Models\LoginAttempt</code></td><td>omezení pokusů o přihlášení</td></tr>
+</table>
+
+<h4>Klíčová omezení</h4>
+<ul>
+    <li><code>users.username</code> a <code>users.email</code> jsou unikátní, <code>events.slug</code> a <code>categories.slug</code> také.</li>
+    <li><code>registrations</code> má unikátní dvojici <code>event_id</code> a <code>user_id</code> a unikátní <code>variable_symbol</code>.</li>
+    <li>Cizí klíče používají <code>RESTRICT</code>, aby nebylo možné smazat záznam, na kterém závisí jiná data.</li>
+    <li><code>ticket_types</code> a <code>comments</code> a <code>ratings</code> se mažou s událostí (<code>CASCADE</code>).</li>
+</ul>
+
+<h2 id="architektura">4. Architektura Laravel aplikace</h2>
+<table>
+    <tr><th>Vrstva</th><th>Umístění</th><th>Odpovědnost</th></tr>
+    <tr><td>Routy</td><td><code>routes/web.php</code></td><td>české cesty, anglické názvy, middleware <code>auth</code>, <code>moderator</code>, <code>admin</code></td></tr>
+    <tr><td>Controllery</td><td><code>app/Http/Controllers</code></td><td>tenká vrstva: validace vstupu, volání service, redirect s flash</td></tr>
+    <tr><td>Form request</td><td><code>app/Http/Requests/RegisterRequest.php</code></td><td>validace registrace účtu</td></tr>
+    <tr><td>Middleware</td><td><code>app/Http/Middleware</code></td><td><code>EnsureSessionIsCurrent</code> (auth_version), <code>EnsureModerator</code>, <code>EnsureAdmin</code></td></tr>
+    <tr><td>Policies</td><td><code>app/Policies</code></td><td><code>EventPolicy</code> (správa, odeslání, zrušení, účastníci), <code>CatalogPolicy</code> (návrhy)</td></tr>
+    <tr><td>Services</td><td><code>app/Services</code></td><td>business pravidla a transakce</td></tr>
+    <tr><td>Repositories</td><td><code>app/Repositories/EventRepository.php</code></td><td>vyhledávání, filtr dostupnosti, kalendář, export</td></tr>
+    <tr><td>Modely</td><td><code>app/Models</code></td><td>Eloquent relace, casty, pomocné predikáty stavů</td></tr>
+    <tr><td>Podpora</td><td><code>app/Support</code></td><td>datumy a peníze, slug, ICS, upload obrázků, česká pluralizace</td></tr>
+    <tr><td>Šablony</td><td><code>resources/views</code></td><td>Blade layout, partials a sekce</td></tr>
+</table>
+
+<table>
+    <tr><th>Service</th><th>Pravidla</th></tr>
+    <tr><td><code>EventService</code></td><td>vytvoření a úprava v transakci, validace budoucnosti začátku, kontrola kapacity proti aktivním registracím, synchronizace typů vstupenek, detekce podstatné změny, schválení a zamítnutí, zrušení s dopadem na registrace</td></tr>
+    <tr><td><code>RegistrationService</code></td><td>registrace se zámkem události, kontrola stavu, času, duplicity, kapacity události i typu, snapshot ceny, variabilní symbol, potvrzení a odmítnutí platby, zrušení s kontrolou vlastnictví</td></tr>
+    <tr><td><code>CategoryService</code></td><td>strom kategorií, hloubka 4, zákaz cyklu, rodič musí být schválený, mazání jen bez potomků a událostí</td></tr>
+    <tr><td><code>VenueService</code></td><td>návrhy, schvalování, mazání jen bez událostí, správa fotografie</td></tr>
+    <tr><td><code>FeedbackService</code></td><td>hodnocení a komentáře jen pro potvrzené účastníky po ukončení, jeden záznam na uživatele, moderace s důvodem</td></tr>
+    <tr><td><code>UserService</code></td><td>CRUD uživatelů, ochrana posledního administrátora, deaktivace místo mazání, reset hesla</td></tr>
+    <tr><td><code>AuthService</code></td><td>registrace, přihlášení podle jména nebo e-mailu, limit 5 pokusů za 15 minut</td></tr>
+</table>
+
+<h2 id="mapovani">5. Mapování případů použití</h2>
+<table>
+    <tr><th>UC</th><th>Případ použití</th><th>Controller a metoda</th><th>Routa</th><th>Service / model</th></tr>
+    <tr><td>UC-01</td><td>Registrace uživatele</td><td><code>AuthController@register</code></td><td><code>register.store</code> (<code>POST /registrace</code>)</td><td><code>AuthService</code>, <code>RegisterRequest</code></td></tr>
+    <tr><td>UC-02</td><td>Přihlášení, odhlášení, timeout</td><td><code>AuthController@login</code>, <code>@logout</code></td><td><code>login.store</code>, <code>logout</code></td><td><code>AuthService</code>, <code>EnsureSessionIsCurrent</code></td></tr>
+    <tr><td>UC-03</td><td>Procházení a vyhledávání</td><td><code>EventController@index</code></td><td><code>events.index</code></td><td><code>EventRepository</code>, <code>CategoryService</code></td></tr>
+    <tr><td>UC-04</td><td>Detail události</td><td><code>EventController@show</code></td><td><code>events.show</code></td><td><code>Event</code>, <code>FeedbackService</code></td></tr>
+    <tr><td>UC-05</td><td>Profil a heslo</td><td><code>ProfileController@edit</code>, <code>@update</code>, <code>@password</code></td><td><code>profile.*</code></td><td><code>UserService</code></td></tr>
+    <tr><td>UC-06</td><td>Vytvoření události</td><td><code>EventController@create</code>, <code>@store</code></td><td><code>events.create</code>, <code>events.store</code></td><td><code>EventService::create</code></td></tr>
+    <tr><td>UC-07</td><td>Odeslání ke schválení</td><td><code>EventController@submit</code></td><td><code>events.submit</code></td><td><code>EventService::submit</code></td></tr>
+    <tr><td>UC-08</td><td>Úprava a zrušení události</td><td><code>EventController@edit</code>, <code>@update</code>, <code>@cancel</code></td><td><code>events.edit</code>, <code>events.update</code>, <code>events.cancel</code></td><td><code>EventService</code>, <code>EventPolicy</code></td></tr>
+    <tr><td>UC-09</td><td>Návrh místa</td><td><code>VenueController@propose</code>, <code>@store</code>, <code>@editProposal</code>, <code>@updateProposal</code></td><td><code>venues.propose</code>, <code>venues.store</code>, <code>venues.edit-proposal</code>, <code>venues.update-proposal</code></td><td><code>VenueService</code>, <code>CatalogPolicy</code></td></tr>
+    <tr><td>UC-10</td><td>Návrh kategorie</td><td><code>CategoryController@propose</code>, <code>@store</code>, <code>@editProposal</code>, <code>@updateProposal</code></td><td><code>categories.propose</code>, <code>categories.store</code>, <code>categories.edit-proposal</code>, <code>categories.update-proposal</code></td><td><code>CategoryService</code>, <code>CatalogPolicy</code></td></tr>
+    <tr><td>UC-11</td><td>Registrace na událost</td><td><code>RegistrationController@store</code></td><td><code>registrations.store</code></td><td><code>RegistrationService::register</code></td></tr>
+    <tr><td>UC-12</td><td>Potvrzení úhrady</td><td><code>RegistrationController@claimPayment</code>, <code>@confirmPayment</code>, <code>@rejectPayment</code></td><td><code>registrations.claim-payment</code>, <code>registrations.confirm-payment</code>, <code>registrations.reject-payment</code></td><td><code>RegistrationService</code></td></tr>
+    <tr><td>UC-13</td><td>Zrušení registrace</td><td><code>RegistrationController@cancel</code></td><td><code>registrations.cancel</code></td><td><code>RegistrationService::cancel</code></td></tr>
+    <tr><td>UC-14</td><td>Osobní kalendář a export</td><td><code>CalendarController@index</code>, <code>@export</code></td><td><code>calendar.index</code>, <code>calendar.export</code></td><td><code>EventRepository</code>, <code>IcsExport</code></td></tr>
+    <tr><td>UC-15</td><td>Komentář a hodnocení</td><td><code>CommentController</code>, <code>RatingController@store</code></td><td><code>comments.*</code>, <code>ratings.store</code></td><td><code>FeedbackService</code></td></tr>
+    <tr><td>UC-16</td><td>Moderace událostí</td><td><code>ModerationController@events</code>, <code>@event</code>, <code>@approveEvent</code>, <code>@rejectEvent</code></td><td><code>moderation.events*</code></td><td><code>EventService</code></td></tr>
+    <tr><td>UC-17</td><td>Moderace a správa míst</td><td><code>ModerationController@venues</code>, <code>@venue</code>, <code>@createVenue</code>, <code>@storeVenue</code>, <code>@editVenue</code>, <code>@updateVenue</code>, <code>@approveVenue</code>, <code>@rejectVenue</code>, <code>@deleteVenue</code></td><td><code>moderation.venues*</code></td><td><code>VenueService</code></td></tr>
+    <tr><td>UC-18</td><td>Moderace a správa kategorií</td><td><code>ModerationController@categories</code>, <code>@category</code>, <code>@createCategory</code>, <code>@storeCategory</code>, <code>@editCategory</code>, <code>@updateCategory</code>, <code>@approveCategory</code>, <code>@rejectCategory</code>, <code>@deleteCategory</code></td><td><code>moderation.categories*</code></td><td><code>CategoryService</code></td></tr>
+    <tr><td>UC-19</td><td>Moderace komentářů</td><td><code>ModerationController@comments</code>, <code>@hideComment</code>, <code>@showComment</code></td><td><code>moderation.comments*</code></td><td><code>FeedbackService</code></td></tr>
+    <tr><td>UC-20</td><td>Správa uživatelů</td><td><code>AdminUserController</code></td><td><code>admin.users.*</code></td><td><code>UserService</code></td></tr>
+    <tr><td>UC-21</td><td>Přehled mých návrhů</td><td><code>ProfileController@proposals</code></td><td><code>proposals.index</code></td><td><code>Venue</code>, <code>Category</code></td></tr>
+</table>
+
+<h2 id="routy">6. Routy</h2>
+<p>Kompletní seznam je v <code>routes/web.php</code>, přehled i s názvy vypíše
+    <code>php artisan route:list</code>. Cesty jsou české, názvy rout anglické.</p>
+<table>
+    <tr><th>Skupina</th><th>Middleware</th><th>Příklady</th></tr>
+    <tr><td>Veřejné</td><td>—</td><td><code>/</code>, <code>/udalosti</code>, <code>/udalosti/{slug}</code>, <code>/mista</code>, <code>/mista/{id}</code></td></tr>
+    <tr><td>Přihlášení</td><td><code>guest</code></td><td><code>/prihlaseni</code>, <code>/registrace</code></td></tr>
+    <tr><td>Uživatel</td><td><code>auth</code></td><td><code>/profil</code>, <code>/moje-udalosti</code>, <code>/moje-registrace</code>, <code>/muj-kalendar</code>, <code>/moje-navrhy</code>, <code>/udalosti/nova</code></td></tr>
+    <tr><td>Moderace</td><td><code>auth</code> + <code>moderator</code></td><td><code>/moderace/udalosti</code>, <code>/moderace/mista</code>, <code>/moderace/kategorie</code>, <code>/moderace/komentare</code></td></tr>
+    <tr><td>Administrace</td><td><code>auth</code> + <code>admin</code></td><td><code>/admin/uzivatele</code>, <code>/admin/uzivatele/novy</code></td></tr>
+</table>
+<p class="small">Statické cesty jsou registrované před parametrickými, aby <code>/udalosti/nova</code>
+    nekolidovalo s <code>/udalosti/{slug}</code>. Parametry vázané na model používají <code>{event:slug}</code>
+    nebo <code>{event:id}</code>.</p>
+
+<h2 id="bezpecnost">7. Bezpečnost a transakce</h2>
+<ul>
+    <li>Hesla ukládá <code>Hash::make</code> (bcrypt), ověření <code>Hash::check</code>; heslo se nikdy neloguje.</li>
+    <li>Session cookie je <code>HttpOnly</code>, <code>SameSite=Lax</code>, životnost 30 minut; po přihlášení se session regeneruje.</li>
+    <li>Session obsahuje <code>auth_version</code>, middleware <code>EnsureSessionIsCurrent</code> porovnává verzi a aktivitu účtu.
+        Deaktivace, změna role a změna hesla verzi zvyšují a okamžitě ukončí existující přihlášení.</li>
+    <li>CSRF token má každý POST formulář, ověřuje ho <code>VerifyCsrfToken</code> (<code>_token</code>).</li>
+    <li>Autorizace je v middleware (<code>moderator</code>, <code>admin</code>) a v policies; vlastnictví
+        (<code>manager_id</code>, <code>proposed_by</code>, <code>user_id</code>) se kontroluje vždy na serveru.</li>
+    <li>Upload: validace <code>image</code>, MIME JPEG/PNG/WebP, <code>getimagesize</code>, limit 2 MB, náhodný název
+        v <code>storage/app/public/uploads</code>, žádné SVG ani spustitelné soubory.</li>
+    <li>Všechny výstupy v Blade používají escapování <code>{{ }}</code>; surové <code>{!! !!}</code> se nepoužívá.</li>
+    <li>Vyhledávání používá vázané parametry a escapuje znaky <code>%</code> a <code>_</code> v <code>LIKE</code>;
+        povolené hodnoty řazení a filtrů jsou whitelistované.</li>
+    <li>Registrace běží v transakci se zámkem události (<code>lockForUpdate()</code>), takže souběžné požadavky
+        nemohou přeplnit kapacitu ani vytvořit duplicitu.</li>
+    <li>Neexistující záznam vrací 404, cizí záznam 403; vlastní chybové stránky jsou v <code>resources/views/errors</code>.</li>
+</ul>
+
+<h2 id="testovani">8. Testování</h2>
+<p>Testy běží proti MySQL databázi <code>iis_test</code> (SQLite zadání zakazuje). Konfigurace je v <code>phpunit.xml</code>.</p>
+<pre><code>vendor/bin/phpunit                 # celá sada
+vendor/bin/phpunit --testsuite Unit
+vendor/bin/phpunit --filter RegistrationTest</code></pre>
+<table>
+    <tr><th>Soubor</th><th>Pokrývá</th></tr>
+    <tr><td><code>tests/Feature/AuthenticationTest.php</code></td><td>registrace, přihlášení, deaktivace, session, role middleware, CSRF tokeny</td></tr>
+    <tr><td><code>tests/Feature/EventLifecycleTest.php</code></td><td>koncept, odeslání, schválení, podstatná změna, kapacita, mazání vstupenek, zrušení</td></tr>
+    <tr><td><code>tests/Feature/RegistrationTest.php</code></td><td>zdarma vs. placená registrace, snapshot ceny, plná kapacita, duplicita, platby, cizí registrace</td></tr>
+    <tr><td><code>tests/Feature/CatalogTest.php</code></td><td>návrhy míst a kategorií, hloubka 4, cykly, mazání, schvalování</td></tr>
+    <tr><td><code>tests/Feature/FeedbackTest.php</code></td><td>hodnocení a komentáře po ukončení, jeden záznam, moderace</td></tr>
+    <tr><td><code>tests/Feature/AdminUserTest.php</code></td><td>CRUD uživatelů, poslední admin, deaktivace, mazání s referencemi</td></tr>
+    <tr><td><code>tests/Feature/CalendarAndSearchTest.php</code></td><td>kalendář, export <code>.ics</code>, filtry včetně podkategorií a dostupnosti</td></tr>
+    <tr><td><code>tests/Unit/IcsExportTest.php</code></td><td>escapování a skládání ICS, česká pluralizace, slug</td></tr>
+</table>
+<p>Stav posledního běhu: <strong>106 testů, 230 asercí, vše prošlo</strong>. Kromě testů byl celý systém
+    projden v prohlížeči pro každou roli, včetně negativních scénářů (plná kapacita přes upravený
+    požadavek, cizí událost, neoprávněný přístup, neplatný vstup, poslední administrátor).</p>
+
+<h2 id="nasazeni">9. Nasazení</h2>
+<h3>Server Eva (Apache, PHP 8.1)</h3>
+<ol>
+    <li>Nahrát projekt mimo <code>WWW</code>, document root nastavit na <code>public/</code>.</li>
+    <li><code>composer install --no-dev --optimize-autoloader</code></li>
+    <li><code>.env</code> z <code>.env.example</code>, <code>APP_ENV=production</code>, <code>APP_DEBUG=false</code>, údaje DB.</li>
+    <li><code>php artisan key:generate</code>, <code>php artisan migrate --force</code>, <code>php artisan storage:link</code>.</li>
+    <li><code>php artisan config:cache &amp;&amp; php artisan route:cache &amp;&amp; php artisan view:cache</code></li>
+    <li>Práva zápisu pro <code>storage/</code> a <code>bootstrap/cache/</code>.</li>
+    <li>Seedery na produkci nespouštět; ukázková data patří jen do testovací instance.</li>
+</ol>
+<h3>Docker</h3>
+<pre><code>docker compose up --build
+# aplikace: http://localhost:8080, MariaDB: 127.0.0.1:3307</code></pre>
+<p>Kontejner při startu vygeneruje klíč, spustí migrace a seedery (pokud je databáze prázdná).</p>
+
+<h2 id="data">10. Ukázková data a účty</h2>
+<p>Seeder vytváří 10 uživatelů, 11 míst, 12 kategorií, 14 událostí ve všech stavech, 20 typů vstupenek,
+    22 registrací, komentáře a hodnocení. Heslo všech účtů je <code>heslo123</code>.</p>
+<table>
+    <tr><th>Účet</th><th>Role</th><th>Význam pro testování</th></tr>
+    <tr><td><code>admin</code></td><td>administrátor</td><td>správa uživatelů, moderace</td></tr>
+    <tr><td><code>moderator</code>, <code>moderator2</code></td><td>moderátor</td><td>fronty schvalování, moderace komentářů</td></tr>
+    <tr><td><code>user</code></td><td>uživatel</td><td>vlastní události, registrace, kalendář</td></tr>
+    <tr><td><code>jana</code>, <code>petr</code>, <code>eva</code>, <code>martin</code>, <code>lucie</code></td><td>uživatel</td><td>další účastníci a správci událostí</td></tr>
+    <tr><td><code>neaktivni</code></td><td>uživatel (deaktivovaný)</td><td>ověření, že se nepřihlásí</td></tr>
+</table>
+<p class="small">Hesla v této dokumentaci patří pouze do odevzdávaného souboru, ne na veřejně dostupnou stránku.</p>
+
+<h2 id="video">11. Video</h2>
+<p>Komentovaná ukázka základních případů použití: přihlášení všech rolí, založení události, schválení
+    moderátorem, registrace a platba, kalendář s exportem <code>.ics</code>, hodnocení a moderace komentáře,
+    správa uživatelů.</p>
+<p><em>Odkaz na video bude doplněn po nahrání.</em></p>
+
+<h2 id="omezeni">12. Omezení</h2>
+<ul>
+    <li>Platby jsou evidované jako potvrzení úhrady; napojení na platební bránu není součástí zadání.</li>
+    <li>Import reálných událostí a obousměrná synchronizace s Google kalendářem nejsou implementované,
+        export <code>.ics</code> je jednosměrný a funguje s libovolným kalendářem.</li>
+    <li>Souběžnost kapacity je řešená transakcí a zámkem řádku, nikoli frontou; pro školní rozsah dostačuje.</li>
+    <li>E-maily se neodesílají; <code>MAIL_MAILER=log</code> zapisuje zprávy do logu.</li>
+</ul>
+
+<hr>
+<p class="small">Dokumentace odpovídá větvi <code>laravel</code>. Původní plán a zadání zůstávají v repozitáři.</p>
+</body>
+</html>

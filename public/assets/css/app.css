@@ -1,0 +1,24 @@
+body {
+    background-color: #f5f6f8;
+}
+
+.card {
+    border-color: #dfe3e8;
+}
+
+.table > :not(caption) > * > * {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.auth-form {
+    max-width: 30rem;
+}
+
+.text-preline {
+    white-space: pre-line;
+}

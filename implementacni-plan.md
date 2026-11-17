@@ -1,6 +1,6 @@
 # Implementační plán projektu IIS: systém pro správu událostí
 
-**Verze:** 1.0, návrh k odsouhlasení · **Datum:** 1. 11. 2026
+**Verze:** 1.1 (větev `laravel`), výchozí plán 1.0 · **Datum:** 17. 11. 2026
 **Repozitář:** https://github.com/lukas-dudek/IIS
 **Odevzdání:** nejpozději 22. 11. 2026 23:59, aplikace funkční minimálně do 13. 12. 2026
 
@@ -23,6 +23,7 @@ Oba jsme vývojáři a oba reviewujeme cizí změny. Lukáš vede tým a odevzd�
 - **UC-** jsou případy použití, **BR-** business pravidla, **M-** milníky.
 - **A** je Lukáš, **B** je Honzík.
 - Každý úkol má v GitHub issue odkaz na UC/BR, vlastníka a akceptační kritéria. Bez toho se nezačíná.
+- Kapitoly 2, 7 a 8 popisují větvi `laravel`. Kde se nástroje liší, je u bodu výslovně uvedena i varianta původní větve `feat/loop-p0` (`app/Core`, `config/routes.php`, `database/schema.sql`, PDO). Doménová pravidla v kapitolách 4–6 platí pro obě větve stejně.
 
 ---
 
@@ -77,35 +78,51 @@ Dodat použitelný informační systém pro správu událostí přesně podle va
 
 ## 2. Technologická rozhodnutí
 
-### 2.1 Zvolený stack
+### 2.1 Zvolený stack (větev `laravel`, aktuální)
 
 | Vrstva | Volba | Verze | Odůvodnění |
 |---|---|---|---|
 | Frontend | HTML5, CSS, JavaScript | evergreen | požadavek zadání |
-| CSS/JS framework | Bootstrap | 5.3.x, lokálně v `public/assets/vendor/` | povolený, dostupné komponenty, žádný build step |
-| Backend | PHP | 8.1 na Evě | implicitní a doporučené prostředí, nejjednodušší deploy |
-| Architektura | vlastní malé MVC, front controller | – | vysvětlitelné, bez frameworkového magie |
-| Databáze | MySQL/MariaDB na Evě, InnoDB | ověřit den 1 | implicitní volba, relační model |
-| Přístup k DB | PDO, prepared statements | PHP 8.1 | žádný ORM, SQL je vidět a obhajitelné |
-| Testy | PHPUnit 10 pouze lokálně | ^10.5 | unit testy čisté logiky, není součástí produkce |
-| CI | GitHub Actions: lint + unit testy | – | rychlá zpětná vazba, nezávisí na Evě |
+| CSS/JS framework | Bootstrap | 5.3.3, lokálně v `public/assets/vendor/` | povolený, dostupné komponenty, žádný build step ani CDN |
+| Backend | PHP + Laravel | 8.1 / Laravel 10.50 | Laravel 10 je poslední řada podporující PHP 8.1 na Evě |
+| Architektura | Laravel MVC: routy, controllery, Blade, service vrstva | – | zadání framework výslovně připouští |
+| Databáze | MySQL/MariaDB, InnoDB, `utf8mb4` | testováno 10.11 | relační model, shodné se zadáním |
+| Přístup k DB | Eloquent + migrace, `lockForUpdate()` pro zámky | Laravel 10 | transakce a vázané parametry bez ručního SQL |
+| Testy | PHPUnit 10 nad MySQL testovací databází | ^10.5 | SQLite je zakázaný, testy běží na stejném enginu |
+| CI | GitHub Actions: lint + PHPUnit | – | rychlá zpětná vazba |
 | Verzování | Git + GitHub, privátní repo | – | doporučeno zadáním |
 
-**Záměrně žádné runtime závislosti přes Composer.** Produkce nepotřebuje `vendor/`; autoloader je vlastní, krátký a vysvětlitelný. Bootstrap je jediná třetí knihovna a je nahraný lokálně, aby aplikace nezávisela na CDN. Do odevzdávaného zipu se `public/assets/vendor/` nedává, protože zadání zakazuje odevzdávat kódy cizích knihoven; na Evě soubor zůstává a jeho přesná verze je v `doc.html`.
+**Závislosti.** Jediná runtime závislost je `laravel/framework`; `vendor/` se do odevzdávaného archivu
+nedává (zadání zakazuje odevzdávat kódy cizích knihoven), jeho obsah se instaluje přes Composer a verze
+jsou v `doc.html`. Bootstrap zůstává lokální soubor, bez CDN a bez Node/build stepu.
 
-### 2.2 Zamítnuté alternativy
+### 2.2 Původní varianta (větev `feat/loop-p0`)
+
+Větev `feat/loop-p0` obsahuje první implementaci ve vlastním malém MVC: PHP 8.1, PDO, `config/routes.php`,
+`database/schema.sql`, `database/seed.sql`, vlastní `app/Core` a PHP šablony. Ta varianta zůstává
+v repozitáři, ale dál se nerozvíjí.
+
+| Vrstva | Volba |
+|---|---|
+| Architektura | vlastní malé MVC, front controller |
+| Přístup k DB | PDO, prepared statements |
+| Šablony | vlastní `View` a PHP šablony |
+| Závislosti | žádné runtime Composer závislosti |
+
+### 2.3 Zamítnuté alternativy
 
 | Alternativa | Proč ne |
 |---|---|
-| Laravel | vyžaduje novější PHP než výchozí 8.1, složitější deploy a více magie; na 3 týdny a 2 lidi zbytečné riziko |
-| Nette | rozumná volba, ale učení a ladění frameworku by ubralo čas vlastní doméně; zadání framework nevyžaduje |
-| Node.js/Django/Java | podmínka vlastního hostingu a riziko, že aplikace nepoběží tam, kde má |
-| React/Vue | build step, duplikace logiky, zbytečná složitost pro CRUD a serverové formuláře |
-| SQLite | zakázáno zadáním |
-| ORM | skryté SQL a další vrstva; pro tento rozsah je explicitní PDO jednodušší |
-| Docker v produkci | Eva je přirozené prostředí; Docker by byl další bod selhání |
+| Nette, Symfony | další frameworková vrstva bez přínosu pro tento rozsah; Laravel je nejlépe dokumentovaný |
+| Node.js/Django/Java | podmínka vlastního hostingu a riziko, že aplikace nepoběží na Evě |
+| React/Vue | build step, duplikace logiky, zbytečná složitost pro serverové formuláře |
+| SQLite | zakázáno zadáním, navíc jiné chování zámků |
+| MongoDB a jiné NoSQL | zakázáno zadáním |
+| Docker v produkci | Eva je přirozené prostředí; Docker slouží jen k lokálnímu spuštění |
 
-**Cena rozhodnutí:** sami si musíme ošetřit routing, session, CSRF a autorizaci. To je vědomé; kompenzujeme to malým jádrem, bezpečnostním checklistem a testy. Složitější architektura podle zadání automaticky neznamená lepší hodnocení.
+**Cena rozhodnutí.** Framework přináší hotové routování, session, CSRF a autorizaci, ale je potřeba
+umět vysvětlit každou vrstvu. Proto zůstávají tenké controllery, service vrstva s explicitními pravidly
+a testy pro každý přechod stavu. Složitější architektura podle zadání automaticky neznamená lepší hodnocení.
 
 ### 2.3 Ověření prostředí hned první den
 
@@ -680,12 +697,12 @@ flowchart LR
     J --> A
 ```
 
-- Front controller `public/index.php` je jediný vstup pro dynamické požadavky. Lokálně se používá `php -S 127.0.0.1:8000 -t public public/router.php`; `router.php` vrátí `false` pro existující statické soubory a jinak předá požadavek `index.php`.
-- Statické soubory obsluhuje Apache přímo; uploady jsou v `public/uploads/` s vypnutým PHP.
-- Controller je tenký: načte vstup, zavolá service/repository, rozhodne o redirectu nebo renderu.
-- Repository obsahuje explicitní SQL a mapování na pole; žádný generický base repository.
-- Service vzniká jen tam, kde je více kroků nebo transakce: událost, registrace, kategorie, uživatel, auth.
-- View escapuje výstup helperem `e()`; šablony neobsahují SQL ani business rozhodnutí.
+- Na větvi `laravel` je vstupem `public/index.php` (Laravel front controller). Lokálně `php artisan serve --host=127.0.0.1 --port=8000`, v Dockeru Apache s document rootem `public/`. Na větvi `feat/loop-p0` se používá `php -S 127.0.0.1:8000 -t public public/router.php`.
+- Statické soubory obsluhuje Apache přímo. Uploady na větvi `laravel` leží v `storage/app/public/uploads` a jsou přístupné přes `storage:link`; na `feat/loop-p0` v `public/uploads/` s vypnutým PHP.
+- Controller je tenký: načte vstup, zavolá service/repository, rozhodne o redirectu nebo renderu. Na větvi `laravel` navíc ověří oprávnění přes `Gate::authorize` a policy.
+- Repository obsahuje explicitní dotazy; žádný generický base repository. Na větvi `laravel` jde o Eloquent query builder s vázanými parametry v `EventRepository`.
+- Service vzniká jen tam, kde je více kroků nebo transakce: událost, registrace, kategorie, místo, uživatel, auth, feedback.
+- Blade escapuje výstup `{{ }}`; šablony neobsahují dotazy ani business rozhodnutí.
 
 ### 7.2 Adresářová struktura
 
@@ -1096,7 +1113,7 @@ Všechna pravidla platí na serveru; HTML5 atributy jsou jen nápověda. Validá
 
 | Oblast | Soubory | Vlastník | Recenzent |
 |---|---|---|---|
-| jádro, router, DB, session, config, CI | `app/Core/*`, `app/bootstrap.php`, `config/*`, `bin/*`, `.github/*` | A | B |
+| jádro, router, DB, session, config, CI | `feat/loop-p0`: `app/Core/*`, `app/bootstrap.php`, `config/*`; `laravel`: `app/Providers/*`, `app/Http/Middleware/*`, `bootstrap/*`, `config/*`, `routes/web.php` | A | B |
 | auth, profil, admin uživatelů | `AuthController`, `ProfileController`, `AdminUserController`, `AuthService`, `UserService`, `UserRepository` | A | B |
 | místa a kategorie – katalog, návrhy, detail | `VenueController`, `CategoryController`, `VenueRepository`, `CategoryRepository`, `CategoryService` | A | B |
 | moderace – UI a fronty (události, místa, kategorie, komentáře) | `ModerationController`, `app/Views/moderation/*` | A | B |
@@ -1109,7 +1126,7 @@ Všechna pravidla platí na serveru; HTML5 atributy jsou jen nápověda. Validá
 | moderace komentářů | `ModerationController` (komentáře) | A | B |
 | layout, partials, základní CSS | `app/Views/layouts/*`, `partials/*`, `public/assets/css/app.css` | A | B |
 | seed a demo data | `database/seed.sql`, `docs/demo.md` | B | A |
-| schéma a migrace SQL | `database/schema.sql` | B (návrh), A (review) | oba |
+| schéma a migrace SQL | `database/migrations/*` (`laravel`), respektive `database/schema.sql` (`feat/loop-p0`) | B (návrh), A (review) | oba |
 | dokumentace, diagramy | `docs/doc.html`, `docs/diagrams/*` | A (celek), B (své moduly) | oba |
 | video | scénář a záznam | oba | – |
 | deployment | `bin/deploy.sh`, Eva | A | B |
@@ -1323,7 +1340,7 @@ Akceptace: <co musí fungovat, včetně negativních případů>.
 
 ```text
 Implementuj minimální front controller a router pro PHP 8.1 bez frameworku.
-Routy jsou v config/routes.php jako pole [method, pattern, controller, action, middleware].
+Na větvi `laravel` jsou routy v `routes/web.php` (Laravel router, pojmenované routy, middleware skupiny). Na větvi `feat/loop-p0` byly v `config/routes.php` jako pole [method, pattern, controller, action, middleware].
 Pattern podporuje {id} a {slug}, parametry se předávají jako asociativní pole.
 Middlewary: auth, role:moderator, role:admin, csrf pro POST.
 Chyby: 404, 403, 500; produkce nesmí zobrazit stack trace.
@@ -1563,7 +1580,7 @@ V záložní variantě se `config/` a `storage/` drží mimo `~/WWW` a přístup
 3. Nahrát repo bez `config/config.php`, logů a Composer `vendor/`; `public/assets/vendor/` s Bootstrapem naopak nahrát, aby web nezávisel na CDN.
 4. Vytvořit `config/config.php` z example, nastavit produkci, URL, DB a timeout.
 5. Nastavit práva: adresáře 755, soubory 644, `storage/` a `public/uploads/` zapisovatelné pro uživatele.
-6. Importovat `database/schema.sql` a `database/seed.sql`; ověřit kódování a časové pásmo.
+6. Na větvi `laravel` spustit `php artisan migrate --force` a seedery jen v testovacím prostředí; na `feat/loop-p0` importovat `database/schema.sql` a `database/seed.sql`. Ověřit kódování a časové pásmo.
 7. Zkontrolovat `.htaccess`: rewrite na `index.php`, UTF-8 podle FAQ bodu 14, zákaz dotfiles, zákaz PHP v uploads.
 8. Otevřít URL, ověřit 200, přihlášení všech rolí, DB dotaz, upload, session.
 9. Zapsat skutečnou verzi PHP, DB a případné odchylky do dokumentace.
@@ -1661,7 +1678,7 @@ Mapovací tabulka musí být konkrétní, například:
 ### 16.4 Odevzdání
 
 - [ ] Jeden zip s názvem `<login>.zip`, odevzdává vedoucí týmu.
-- [ ] Obsahuje vlastní zdrojové kódy, `database/schema.sql`, `database/seed.sql`, `docs/doc.html`, README a konfigurační vzor.
+- [ ] Obsahuje vlastní zdrojové kódy, zdroj pravdy pro schéma (`database/migrations/` na větvi `laravel`), seedery, `docs/doc.html`, README a konfigurační vzor.
 - [ ] Neobsahuje `.git`, `config/config.php`, logy, produkční uploady, `public/assets/vendor/` ani jiné cizí knihovny; Bootstrap je na Evě a jeho verze je v dokumentaci.
 - [ ] Neobsahuje interní `AGENTS.md`, `implementacni-plan.md` ani zadání; ty zůstávají v repozitáři, ne v odevzdávaném zipu.
 - [ ] Neobsahuje osobní údaje, hesla v README ani testovací hesla na veřejné stránce.
@@ -1784,7 +1801,7 @@ Mapovací tabulka musí být konkrétní, například:
 
 - [ ] Založit issues pro M0 a první P0 úkoly s odkazy na UC/BR.
 - [ ] Vytvořit `.gitignore`, `.editorconfig`, README se spuštěním lokálně.
-- [ ] Napsat `database/schema.sql` v1 a `seed.sql` draft; review druhým.
+- [ ] Napsat schéma v1 (migrace na větvi `laravel`) a seedery; review druhým.
 - [ ] Postavit skeleton: `public/index.php`, bootstrap, router, DB, session, layout, 404.
 - [ ] Nasadit skeleton na Evu a ověřit DB připojení a práva.
 - [ ] Napsat `docs/obhajoba.md` první verzi (tok requestu, session, CSRF, práva).

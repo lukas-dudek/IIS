@@ -7,30 +7,31 @@
 
 # Composer – runtime ani dev vendor necommitovat
 /vendor/
+/composer.phar
 
 # PHPUnit a nástroje
 .phpunit.result.cache
 .phpunit.cache/
 /coverage/
+/build/
+
+# Laravel runtime – adresáře si drží vlastní .gitignore soubory
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+/public/storage
 
 # Logy a dočasné soubory
 *.log
-/storage/logs/*
-!/storage/logs/.gitkeep
-/storage/tmp/*
-!/storage/tmp/.gitkeep
 
-# Uživatelské uploady
+# Uživatelské uploady původní větve
 /public/uploads/*
 !/public/uploads/.gitkeep
-# Až přibude .htaccess a demo data, výjimky se doplní:
-# !/public/uploads/.htaccess
-# !/public/uploads/demo/
-# !/public/uploads/demo/**
+!/public/uploads/.htaccess
 
 # Odevzdávané archivy a lokální dumpy
 /*.zip
 *.dump
+*.sql.gz
 
 # OS a editory
 .DS_Store

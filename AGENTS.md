@@ -17,15 +17,44 @@ Aplikace musí být použitelná, bezpečná, konzistentní a obhajitelná. Nest
 
 ## 3. Pevná rozhodnutí
 
-- PHP 8.1, vlastní malé MVC, front controller, PDO, MySQL/MariaDB, Apache, Bootstrap 5.3 lokálně, vanilla JS.
-- Žádný runtime Composer, žádný ORM, žádný framework, žádný build step, žádné CDN.
-- PHPUnit 10 jen lokálně pro testy; produkce `vendor/` nepotřebuje.
+- Větev `laravel` (aktuální implementace): PHP 8.1, **Laravel 10**, Eloquent, migrace, Blade,
+  MySQL/MariaDB, Apache, Bootstrap 5.3 lokálně, vanilla JS. Rozhodnutí o frameworku je vědomá změna
+  původního plánu, zadání framework výslovně připouští; odchylky shrnuje `docs/laravel-migrace.md`.
+- Větev `feat/loop-p0` obsahuje původní vlastní MVC (PDO, `config/routes.php`, `database/schema.sql`).
+  Obě větve se nemíchají; pravidla níže platí pro obě, rozdíly v nástrojích jsou popsané u konkrétních bodů.
+- Žádný build step a žádné CDN. Bootstrap je lokální soubor. Na větvi `laravel` je jediná runtime
+  závislost Composer (framework) a `vendor/` se do odevzdávaného archivu nedává.
 - Kód anglicky, UI česky. Tabulky a sloupce anglicky.
 - Časy v DB UTC, zobrazení `Europe/Prague`. Peníze `DECIMAL(10,2)`, v UI `Kč`.
-- SQLite, MongoDB, React, Laravel, Nette a podobné změny stacku jsou zakázané bez výslovného souhlasu obou.
-- Zdroj pravdy pro schéma je `database/schema.sql`; zdroj pravdy pro routy `config/routes.php`.
+- SQLite, MongoDB, React, Vue a podobné změny stacku jsou zakázané bez výslovného souhlasu obou.
+- Zdroj pravdy pro schéma jsou migrace v `database/migrations/` (na větvi `feat/loop-p0` soubor
+  `database/schema.sql`); zdroj pravdy pro routy je `routes/web.php` (na `feat/loop-p0`
+  `config/routes.php`).
 
 ## 4. Struktura a vlastnictví
+
+Větev `laravel`:
+
+```text
+app/Http/Controllers/   tenké controllery
+app/Http/Middleware/    session a role middleware
+app/Http/Requests/      validace formulářů
+app/Models/             Eloquent modely
+app/Policies/           serverová autorizace vlastnictví
+app/Repositories/       vyhledávání a kalendář
+app/Services/           transakce a business pravidla
+app/Support/            datum, peníze, slug, ICS, upload
+resources/views/        Blade layout, partials, sekce
+routes/web.php          routy
+database/migrations/    schéma
+database/seeders/       ukázková data
+public/                 document root, assets
+lang/cs/                české validace a popisky
+tests/Unit|Feature/     PHPUnit
+docs/                   doc.html, laravel-migrace.md, diagramy
+```
+
+Větev `feat/loop-p0` (původní MVC):
 
 ```text
 app/Core/            jádro: router, request, response, DB, session, auth, CSRF, validace
@@ -59,7 +88,19 @@ Shared soubory (`config/routes.php`, `database/schema.sql`, `public/assets/css/a
 
 ## 5. Příkazy
 
-Lokální vývoj:
+Lokální vývoj na větvi `laravel`:
+
+```bash
+composer install
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve --host=127.0.0.1 --port=8000
+vendor/bin/phpunit
+find app database routes tests -name '*.php' -print0 | xargs -0 -n1 php -l
+docker compose up --build        # volitelně celý stack
+```
+
+Lokální vývoj na větvi `feat/loop-p0`:
 
 ```bash
 php -S 127.0.0.1:8000 -t public public/router.php
@@ -103,17 +144,17 @@ Nevymýšlej nové stavy, sloupce ani role. Platí:
 - Žádné dekorativní hlavičky souborů, autorství, datumy ani značky nástrojů.
 - Žádný zakomentovaný kód, `TODO`, `FIXME`, `var_dump`, `print_r`, `console.log`, `die()` pro uživatelské chyby.
 - Nepřepisuj formátování nesouvisejících souborů. Nepřesouvej soubory bez důvodu.
-- Router: `{id}` matchuje jen `\d+` a kladné číslo, `{slug}` jen `[a-z0-9-]+`; statické cesty se registrují před parametrickými, jinak vzniká kolize.
+- Router: `{id}` matchuje jen `\d+` a kladné číslo, `{slug}` jen `[a-z0-9-]+`; statické cesty se registrují před parametrickými, jinak vzniká kolize. Na větvi `laravel` totéž platí pro pořadí v `routes/web.php` a vázání `{event:slug}` / `{event:id}`.
 - Preferuj jednoduché a vysvětlitelné řešení před „chytrým“.
 
 ## 8. Databáze a transakce
 
-- Vždy prepared statements. Nikdy neinterpoluj vstup do SQL, ani do `LIKE`, ani do `ORDER BY`.
+- Vždy prepared statements nebo query builder s vázanými parametry. Nikdy neinterpoluj vstup do SQL, ani do `LIKE`, ani do `ORDER BY`.
 - Povolené hodnoty řazení a enumů whitelistuj v PHP.
 - Vícekrokové operace a vše, co mění kapacitu, dělej v transakci.
-- Registrace: `SELECT ... FOR UPDATE` na události, kontrola stavu, času, duplicity, kapacity události a typu, snapshot ceny, insert/update, commit.
+- Registrace: `SELECT ... FOR UPDATE` na události (na větvi `laravel` `lockForUpdate()`), kontrola stavu, času, duplicity, kapacity události a typu, snapshot ceny, insert/update, commit.
 - Chyby mapuj na srozumitelné české hlášky; SQL výjimky nepropouštěj k uživateli.
-- Nepřidávej sloupec, tabulku ani index bez dohody a bez aktualizace `schema.sql`, `seed.sql`, ER diagramu a dokumentace.
+- Nepřidávej sloupec, tabulku ani index bez dohody a bez aktualizace schématu (migrace, respektive `schema.sql`), seedů, ER diagramu a dokumentace.
 - Nepoužívej `NOW()` v aplikaci jako zdroj pravdy pro business čas; čas počítej v PHP v UTC.
 - Databázové heslo nikdy do gitu. `config/config.php` je ignorovaný, verzuje se jen `config.example.php`.
 
@@ -123,7 +164,7 @@ Toto nejsou doporučení, ale podmínky mergování:
 
 - Hesla přes `password_hash`/`password_verify`. Nikdy `md5`, `sha1`, plaintext ani vlastní hash.
 - Session po přihlášení regeneruj, cookie `HttpOnly`, `SameSite=Lax`, `Secure` na HTTPS, timeout 30 minut.
-- Session drží `user_id` a `auth_version`; každý request ověří aktivitu a shodu verze. Deaktivace, změna role a změna hesla `auth_version` zvyšují.
+- Session drží `user_id` a `auth_version`; každý request ověří aktivitu a shodu verze. Deaktivace, změna role a změna hesla `auth_version` zvyšují. Na větvi `laravel` to řeší middleware `EnsureSessionIsCurrent`.
 - Všechny POST formuláře mají CSRF token a server ho ověřuje přes `hash_equals`.
 - Každý přístup k záznamu kontroluje roli a vlastnictví na serveru. Skrytí tlačítka není autorizace.
 - Všechny výstupy escapuj helperem `e()`. Žádné `echo $_GET`, `echo $model->title` bez escapování.
@@ -175,7 +216,7 @@ Toto nejsou doporučení, ale podmínky mergování:
 - Nespouštěj testy, které potřebují produkční DB nebo produkční data.
 - Piš testy business pravidel, ne frameworku. Testuj hranice, přechody stavů a chybové stavy.
 - Pokud test nejde spustit, napiš to. Netvrď, že prošel.
-- Před PR: `php -l`, unit testy, ruční scénář, kontrola logu a konzole.
+- Před PR: `php -l` (na větvi `laravel` nad `app`, `database`, `routes`, `tests`), PHPUnit, ruční scénář, kontrola logu a konzole.
 
 ## 14. Dokumentace
 

@@ -1,0 +1,44 @@
+services:
+    app:
+        build: .
+        ports:
+            - "8080:80"
+        environment:
+            APP_ENV: local
+            APP_DEBUG: "true"
+            APP_URL: http://localhost:8080
+            DB_CONNECTION: mysql
+            DB_HOST: db
+            DB_PORT: "3306"
+            DB_DATABASE: iis
+            DB_USERNAME: iis
+            DB_PASSWORD: iis_local_dev
+            SESSION_DRIVER: file
+            SESSION_LIFETIME: "30"
+            CACHE_STORE: file
+            RUN_MIGRATIONS: "1"
+            RUN_SEEDER: "1"
+        depends_on:
+            db:
+                condition: service_healthy
+
+    db:
+        image: mariadb:10.11
+        environment:
+            MARIADB_DATABASE: iis
+            MARIADB_USER: iis
+            MARIADB_PASSWORD: iis_local_dev
+            MARIADB_ROOT_PASSWORD: root_local_dev
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_czech_ci --default-time-zone=+00:00
+        ports:
+            - "3307:3306"
+        healthcheck:
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            interval: 5s
+            timeout: 5s
+            retries: 20
+        volumes:
+            - dbdata:/var/lib/mysql
+
+volumes:
+    dbdata:

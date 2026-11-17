@@ -1,0 +1,17 @@
+.git
+.gitignore
+vendor
+node_modules
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/public/uploads/*
+.env
+.env.*
+!.env.example
+docker-compose.yml
+*.zip
+tests
+phpunit.xml
+docs
